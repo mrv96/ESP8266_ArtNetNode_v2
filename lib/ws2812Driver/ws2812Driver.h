@@ -43,8 +43,8 @@ class ws2812Driver {
     }
     void setBuffer(uint8_t port, uint16_t startChan, uint8_t* data, uint16_t size);
     
-    byte setPixel(uint8_t port, uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
-    byte setPixel(uint8_t port, uint16_t pixel, uint32_t colour);
+    void setPixel(uint8_t port, uint16_t pixel, uint8_t r, uint8_t g, uint8_t b);
+    void setPixel(uint8_t port, uint16_t pixel, uint32_t colour);
     uint32_t getPixel(uint8_t port);
     
     bool show() __attribute__ ((optimize(0)));

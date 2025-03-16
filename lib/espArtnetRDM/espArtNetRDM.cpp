@@ -217,6 +217,8 @@ bool esp8266ArtNetRDM::closePort(uint8_t g, uint8_t p) {
   group->ports[p] = 0;
   group->numPorts--;
   group->ports[p] == 0;
+
+  return true;
 }
 
 void esp8266ArtNetRDM::setArtDMXCallback(artDMXCallBack callback) {

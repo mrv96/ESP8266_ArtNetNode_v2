@@ -77,7 +77,7 @@ void ws2812Driver::setBuffer(uint8_t port, uint16_t startChan, uint8_t* data, ui
   memcpy(&a[startChan], data, size);
 }
 
-byte ws2812Driver::setPixel(uint8_t port, uint16_t pixel, uint8_t r, uint8_t g, uint8_t b) {
+void ws2812Driver::setPixel(uint8_t port, uint16_t pixel, uint8_t r, uint8_t g, uint8_t b) {
   uint8_t* a = buffer[port];
   
   uint16_t chan = pixel * 3;
@@ -88,7 +88,7 @@ byte ws2812Driver::setPixel(uint8_t port, uint16_t pixel, uint8_t r, uint8_t g, 
   a[chan + 2] = b;
 }
 
-byte ws2812Driver::setPixel(uint8_t port, uint16_t pixel, uint32_t colour) {
+void ws2812Driver::setPixel(uint8_t port, uint16_t pixel, uint32_t colour) {
   setPixel(port, pixel, ((colour >> 16) & 0xFF), ((colour >> 8) & 0xFF), (colour & 0xFF));
 }
 
