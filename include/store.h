@@ -58,10 +58,10 @@ struct StoreStruct {
   uint8_t portApixMode, portBpixMode;
   uint16_t portApixFXstart, portBpixFXstart;
   uint8_t resetCounter, wdtCounter;
-  
+
 } deviceSettings = {
   CONFIG_VERSION,
-  
+
   // The default values
   IPAddress(2,0,0,1), IPAddress(255,0,0,0), IPAddress(2,0,0,1), IPAddress(2,255,255,255), IPAddress(2,0,0,1), IPAddress(255,0,0,0), IPAddress(2,255,255,255), IPAddress(2,255,255,255),
   true, false,
@@ -80,7 +80,7 @@ struct StoreStruct {
 void eepromSave() {
   for (uint16_t t = 0; t < sizeof(deviceSettings); t++)
     EEPROM.write(CONFIG_START + t, *((char*)&deviceSettings + t));
-  
+
   EEPROM.commit();
 }
 
@@ -94,11 +94,11 @@ void eepromLoad() {
     // Store defaults for if we need them
     StoreStruct tmpStore;
     tmpStore = deviceSettings;
-    
+
     // Copy data to deviceSettings structure
     for (uint16_t t = 0; t < sizeof(deviceSettings); t++)
       *((char*)&deviceSettings + t) = EEPROM.read(CONFIG_START + t);
-    
+
     // If we want to restore all our settings
     if (deviceSettings.resetCounter >= 5 || deviceSettings.wdtCounter >= 10) {
       deviceSettings.wdtCounter = 0;
@@ -113,9 +113,8 @@ void eepromLoad() {
   } else {
     eepromSave();
     delay(500);
-    
+
     ESP.eraseConfig();
     while(1);
   }
 }
-

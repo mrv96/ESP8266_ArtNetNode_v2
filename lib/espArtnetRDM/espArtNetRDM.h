@@ -54,7 +54,7 @@ struct _port_def {
 
   // Port universe
   byte portUni;
-  
+
   // DMX final values buffer
   byte* dmxBuffer;
   uint16_t dmxChans;
@@ -88,7 +88,7 @@ struct _group_def {
   // Port Address
   byte netSwitch = 0x00;
   byte subnet = 0x00;
-  
+
   port_def* ports[4] = {0,0,0,0};
   byte numPorts = 0;
 
@@ -100,7 +100,7 @@ struct _group_def {
 typedef struct _group_def group_def;
 
 struct _artnet_def {
-  
+
   IPAddress deviceIP;
   IPAddress subnet;
   IPAddress broadcastIP;
@@ -109,7 +109,7 @@ struct _artnet_def {
 
   IPAddress syncIP;
   unsigned long lastSync;
-  
+
   uint8_t deviceMAC[6];
   bool dhcp = true;
 
@@ -130,7 +130,7 @@ struct _artnet_def {
   uint32_t nodeReportCounter;
   uint16_t nodeReportCode;
   char nodeReport[ARTNET_NODE_REPORT_LENGTH];
-  
+
   // callback functions
   artDMXCallBack dmxCallBack = 0;
   artSyncCallBack syncCallBack = 0;
@@ -151,7 +151,7 @@ class esp8266ArtNetRDM {
     // init fuctions
     esp8266ArtNetRDM();
     ~esp8266ArtNetRDM();
-    
+
     void init(IPAddress, IPAddress, bool, char*, char*, uint16_t, uint16_t, uint8_t*);
     void init(IPAddress ip, IPAddress sub, bool dhcp, uint16_t oem, uint16_t esta, uint8_t* mac) {
       init(ip, sub, dhcp, "espArtNetNode", "espArtNetNode", oem, esta, mac);
@@ -168,7 +168,7 @@ class esp8266ArtNetRDM {
       init(INADDR_NONE, INADDR_NONE, false, "espArtNetNode", "espArtNetNode", oem, esta, mac);
       setDefaultIP();
     };
-    
+
     void setFirmwareVersion(uint16_t);
     void setDefaultIP();
 
@@ -196,7 +196,7 @@ class esp8266ArtNetRDM {
     void setE131(uint8_t, uint8_t, bool);
     bool getE131(uint8_t, uint8_t);
     void setE131Uni(uint8_t, uint8_t, uint16_t);
-    
+
     // handler function for including in loop()
     void handler();
 
@@ -238,7 +238,7 @@ class esp8266ArtNetRDM {
     // RDM functions
     void rdmResponse(rdm_data*, uint8_t, uint8_t);
     void artTODData(uint8_t, uint8_t, uint16_t*, uint32_t*, uint16_t, uint8_t);
-    
+
     // get network settings
     IPAddress getIP();
     IPAddress getSubnetMask();
@@ -251,10 +251,10 @@ class esp8266ArtNetRDM {
 
   private:
     artnet_device* _art = 0;
-    
+
     int _artOpCode(unsigned char*);
     void _artIPProgReply();
-    
+
     // handlers for received packets
     void _artPoll(void);
     void _artDMX(unsigned char*);
@@ -269,7 +269,7 @@ class esp8266ArtNetRDM {
     void _artRDMSub(unsigned char*);
 
     void _e131Receive(e131_packet_t*);
-    
+
     uint8_t _dmxSeqID = 0;
     uint8_t e131Count = 0;	// the number of e131 ports currently open
 

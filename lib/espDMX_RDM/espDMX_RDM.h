@@ -146,7 +146,7 @@ class espDMX {
         void unPause();
         void end();
         void ledIntensity(uint8_t);
-        
+
         void setChans(byte *data) {
             setChans(data, 512, 1);
         }
@@ -160,7 +160,7 @@ class espDMX {
         void clearChans();
         byte *getChans();
         uint16_t numChans();
-        
+
 /*  from stream class
         int available(void) override;
         int peek(void) override;
@@ -176,10 +176,10 @@ class espDMX {
         void rdmDiscovery() {
           rdmDiscovery(RDM_DISCOVERY_TOD_WIPE);
         };
-        
+
         void rdmSetCallBack(void (*rdmCallBackFunc)(rdm_data*));
         void todSetCallBack(void (*todCallBackFunc)(void));
-        
+
         bool rdmSendCommand(rdm_data*);
         bool rdmSendCommand(uint8_t, uint16_t, uint16_t, uint32_t, byte*, uint16_t, uint16_t);
         bool rdmSendCommand(uint8_t cmdClass, uint16_t pid, uint16_t manID, uint32_t devID, byte* data, uint16_t dataLength) {
@@ -203,28 +203,28 @@ class espDMX {
         void dmxIn(bool doIn);
 
         void setInputCallback(void (*inputCallBackFunc)(uint16_t));
-        
+
     private:
         friend void dmx_interrupt_handler(void);
         friend void rdm_timer_handler(void);
         friend void rdm_interrupt_disarm(dmx_t* dmx);
         friend void rdmPause(bool);
-        
+
         void _transmit(void);
 	void fillTX(void);
-        
+
         void inputBreak(void);
         void dmxReceived(uint8_t);
 
         void rdmRXTimeout(void);
         void rdmBreakDetect(void);
-        
+
         void rdmReceived(void);
         void rdmMuteResponse(rdm_data*);
         void rdmDiscoveryResponse(rdm_data*);
-        
+
         bool rdmDiscConfirm();
-        
+
         bool rdmDiscoverBranch(uint16_t, uint32_t, uint16_t, uint32_t, bool);
         bool rdmDiscoverBranch(void) {
           return rdmDiscoverBranch(0x0000, 0x00000000, 0xFFFF, 0xFFFFFFFF, false);
@@ -239,4 +239,3 @@ extern espDMX dmxA;
 extern espDMX dmxB;
 extern void rdmPause(bool);
 #endif
-

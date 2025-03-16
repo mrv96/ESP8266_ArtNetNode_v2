@@ -20,20 +20,20 @@ union rdm_data_ {
     byte     TransNo;      // transaction number, not checked
     byte     ResponseType; // ResponseType
     byte     MsgCount;     // Message count
-    uint16_t SubDev;       // sub device number (root = 0) 
+    uint16_t SubDev;       // sub device number (root = 0)
     byte     CmdClass;     // command class
     uint16_t PID;          // parameter ID
     byte     DataLength;   // parameter data length in bytes
     byte     Data[231];    // data byte field
   } __attribute__((packed)) packet;
-  
+
   struct {
     byte headerFE;
     byte headerAA;
     byte maskedDevID[12];
     byte maskedChecksum[4];
   } __attribute__((packed)) discovery;
-  
+
   byte buffer[255];
 
   void endianFlip(void) {

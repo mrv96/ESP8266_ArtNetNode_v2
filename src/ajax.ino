@@ -16,16 +16,16 @@ If not, see http://www.gnu.org/licenses/
 void ajaxHandle() {
   JsonObject& json = jsonBuffer.parseObject(webServer.arg("plain"));
   JsonObject& jsonReply = jsonBuffer.createObject();
-  
+
   String reply;
-  
+
   // Handle request to reboot into update mode
   if (json.containsKey("success") && json["success"] == 1 && json.containsKey("doUpdate")) {
     artRDM.end();
-    
+
     jsonReply["success"] = 1;
     jsonReply["doUpdate"] = 1;
-    
+
     jsonReply.printTo(reply);
     webServer.send(200, "application/json", reply);
 
@@ -33,13 +33,13 @@ void ajaxHandle() {
       // Turn pixel strips off if they're on
       pixDriver.updateStrip(0, 0, deviceSettings.portApixConfig);
       pixDriver.updateStrip(1, 0, deviceSettings.portBpixConfig);
-      
+
       deviceSettings.doFirmwareUpdate = true;
       eepromSave();
-      
+
       doReboot = true;
     }
-    
+
   // Handle load and save of data
   } else if (json.containsKey("success") && json["success"] == 1 && json.containsKey("page")) {
     if (ajaxSave((uint8_t)json["page"], json)) {
@@ -52,20 +52,20 @@ void ajaxHandle() {
       jsonReply["success"] = 0;
       jsonReply["message"] = "Failed to save data.  Reload page and try again.";
     }
-    
+
   // Handle reboots
   } else if (json.containsKey("success") && json.containsKey("reboot") && json["reboot"] == 1) {
     jsonReply["success"] = 1;
     jsonReply["message"] = "Device Restarting.";
-    
+
     // Turn pixel strips off if they're on
     pixDriver.updateStrip(0, 0, deviceSettings.portApixConfig);
     pixDriver.updateStrip(1, 0, deviceSettings.portBpixConfig);
-    
+
     doReboot = true;
 
   // Handle errors
-  } 
+  }
 
   jsonReply.printTo(reply);
   webServer.send(200, "application/json", reply);
@@ -75,7 +75,7 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
   // This is a load request, not a save
   if (json.size() == 2)
     return true;
-  
+
   switch (page) {
     case 1:     // Device Status
       // We don't need to save anything for this.  Go straight to load
@@ -105,7 +105,7 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
       json.get<String>("longName").toCharArray(deviceSettings.longName, 64);
 
       if (!isHotspot && (bool)json["dhcpEnable"] != deviceSettings.dhcpEnable) {
-        
+
         if ((bool)json["dhcpEnable"]) {
           /*
           // Re-enable DHCP
@@ -114,15 +114,15 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
           // Wait for an IP
           while (WiFi.status() != WL_CONNECTED)
             yield();
-          
+
           // Save settings to struct
           deviceSettings.ip = WiFi.localIP();
           deviceSettings.subnet = WiFi.subnetMask();
           deviceSettings.broadcast = {~deviceSettings.subnet[0] | (deviceSettings.ip[0] & deviceSettings.subnet[0]), ~deviceSettings.subnet[1] | (deviceSettings.ip[1] & deviceSettings.subnet[1]), ~deviceSettings.subnet[2] | (deviceSettings.ip[2] & deviceSettings.subnet[2]), ~deviceSettings.subnet[3] | (deviceSettings.ip[3] & deviceSettings.subnet[3])};
           */
-          
+
           deviceSettings.gateway = INADDR_NONE;
-          
+
         }
         /*
         else {
@@ -142,9 +142,9 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
         artRDM.setShortName(deviceSettings.nodeName);
         artRDM.setLongName(deviceSettings.longName);
       }
-      
+
       deviceSettings.dhcpEnable = (bool)json["dhcpEnable"];
-      
+
       eepromSave();
       return true;
       break;
@@ -153,26 +153,26 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
       {
         deviceSettings.portAprot = (uint8_t)json["portAprot"];
         bool e131 = (deviceSettings.portAprot == PROT_ARTNET_SACN) ? true : false;
-        
+
         deviceSettings.portAmerge = (uint8_t)json["portAmerge"];
-  
+
         if ((uint8_t)json["portAnet"] < 128)
           deviceSettings.portAnet = (uint8_t)json["portAnet"];
-  
+
         if ((uint8_t)json["portAsub"] < 16)
         deviceSettings.portAsub = (uint8_t)json["portAsub"];
-  
+
         for (uint8_t x = 0; x < 4; x++) {
           if ((uint8_t)json["portAuni"][x] < 16)
             deviceSettings.portAuni[x] = (uint8_t)json["portAuni"][x];
-          
+
           if ((uint16_t)json["portAsACNuni"][x] > 0 && (uint16_t)json["portAsACNuni"][x] < 64000)
             deviceSettings.portAsACNuni[x] = (uint16_t)json["portAsACNuni"][x];
 
           artRDM.setE131(portA[0], portA[x+1], e131);
           artRDM.setE131Uni(portA[0], portA[x+1], deviceSettings.portAsACNuni[x]);
         }
-  
+
         uint8_t newMode = json["portAmode"];
         uint8_t oldMode = deviceSettings.portAmode;
         bool updatePorts = false;
@@ -184,13 +184,13 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
             dmxB.rdmDisable();
           }
         #endif
-        
+
         if (newMode == TYPE_DMX_IN && json.containsKey("dmxInBroadcast"))
           deviceSettings.dmxInBroadcast = IPAddress(json["dmxInBroadcast"][0],json["dmxInBroadcast"][1],json["dmxInBroadcast"][2],json["dmxInBroadcast"][3]);
-         
-        
+
+
         if (newMode != oldMode) {
-  
+
           // Store the nem mode to settings
           deviceSettings.portAmode = newMode;
 
@@ -198,17 +198,17 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
           /*
           if (oldMode == TYPE_WS2812) {
             doReboot = true;
-            
+
             // Set pixel strip length to zero
             pixDriver.updateStrip(0, 0, deviceSettings.portApixConfig);
-  
+
             // Close ports from pixels - library handles if they dont exist
             for (uint8_t x = 2; x <= 4; x++)
               artRDM.closePort(portA[0], portA[x]);
 
             // Start our DMX port
             dmxA.begin(DMX_DIR_A, artRDM.getDMX(portA[0], portA[1]));
-            
+
           } else if (oldMode == TYPE_DMX_IN)
             dmxA.dmxIn(false);
           else if (oldMode == TYPE_RDM_OUT)
@@ -216,8 +216,8 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
 
           // Start DMX output with no DMX
           if (newMode == TYPE_DMX_OUT) {
-            
-            
+
+
             artRDM.setPortType(portA[0], portA[1], DMX_OUT);
 
           // Start DMX output with RDM
@@ -231,7 +231,7 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
           } else if (newMode == TYPE_DMX_IN) {
             dmxA.dmxIn(true);
             dmxA.setInputCallback(dmxIn);
-            
+
             artRDM.setPortType(portA[0], portA[1], DMX_IN);
 
           // Start WS2812 output
@@ -239,17 +239,17 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
             doReboot = true;
 
             dmxA.end();
-            
+
             artRDM.setPortType(portA[0], portA[1], TYPE_DMX_OUT);
             updatePorts = true;
-            
+
             // Initialize the pixel strip
             pixDriver.setStrip(0, DMX_TX_A, deviceSettings.portAnumPix, deviceSettings.portApixConfig);
-            
+
           }
           */
         }
-        
+
         // Update the Artnet class
         artRDM.setNet(portA[0], deviceSettings.portAnet);
         artRDM.setSubNet(portA[0], deviceSettings.portAsub);
@@ -262,34 +262,34 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
           uint16_t newLen = (json.containsKey("portAnumPix")) ? (uint16_t)json["portAnumPix"] : deviceSettings.portAnumPix;
           if (newLen > 680)
             newLen = 680;
-          
+
           uint16_t oldLen = deviceSettings.portAnumPix;
           bool lenChanged = false;
-  
+
           // If pixel size has changed
           if (newLen <= 680 && oldLen != newLen) {
             // Update our pixel strip
             deviceSettings.portAnumPix = newLen;
             pixDriver.updateStrip(1, deviceSettings.portAnumPix, deviceSettings.portApixConfig);
-  
+
             lenChanged = true;
 
             // If the old mode was pixel map then update the Artnet ports
             if (deviceSettings.portApixMode == FX_MODE_PIXEL_MAP)
               updatePorts = true;
           }
-            
+
           // If the old mode was 12 channel FX, update oldLen to represent the number of channels we used
           if (deviceSettings.portApixMode == FX_MODE_12)
             oldLen = 12;
-  
+
           // If our mode changes then update the Artnet ports
           if (deviceSettings.portApixMode != (uint8_t)json["portApixMode"])
             updatePorts = true;
-  
+
           // Store the new pixel mode
           deviceSettings.portApixMode = (uint8_t)json["portApixMode"];
-  
+
           // If our new mode is FX12 then we need 12 channels & store the start address
           if (deviceSettings.portApixMode == FX_MODE_12) {
             if ((uint16_t)json["portApixFXstart"] <= 501 && (uint16_t)json["portApixFXstart"] > 0)
@@ -307,7 +307,7 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
                 artRDM.closePort(portA[0], portA[y]);
             }
           }
-  
+
           // Set universe and merge settings (port 1 is done above for all port types)
           for (uint8_t x = 1, y = 2; x < 4; x++, y++) {
             if (newLen > (x * 170)) {
@@ -316,9 +316,9 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
             }
           }
         }
-  
+
         artRDM.artPollReply();
-  
+
         eepromSave();
         return true;
       }
@@ -329,36 +329,36 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
       {
         deviceSettings.portBprot = (uint8_t)json["portBprot"];
         bool e131 = (deviceSettings.portBprot == PROT_ARTNET_SACN) ? true : false;
-        
+
         deviceSettings.portBmerge = (uint8_t)json["portBmerge"];
-  
+
         if ((uint8_t)json["portBnet"] < 128)
           deviceSettings.portBnet = (uint8_t)json["portBnet"];
-  
+
         if ((uint8_t)json["portBsub"] < 16)
         deviceSettings.portBsub = (uint8_t)json["portBsub"];
-  
+
         for (uint8_t x = 0; x < 4; x++) {
           if ((uint8_t)json["portBuni"][x] < 16)
             deviceSettings.portBuni[x] = (uint8_t)json["portBuni"][x];
-          
+
           if ((uint16_t)json["portBsACNuni"][x] > 0 && (uint16_t)json["portBsACNuni"][x] < 64000)
             deviceSettings.portBsACNuni[x] = (uint16_t)json["portBsACNuni"][x];
 
           artRDM.setE131(portB[0], portB[x+1], e131);
           artRDM.setE131Uni(portB[0], portB[x+1], deviceSettings.portBsACNuni[x]);
         }
-  
+
         uint8_t newMode = json["portBmode"];
         uint8_t oldMode = deviceSettings.portBmode;
         bool updatePorts = false;
-        
+
         // RDM and DMX input can't run together
         if (newMode == TYPE_RDM_OUT && deviceSettings.portAmode == TYPE_DMX_IN)
           newMode = TYPE_DMX_OUT;
-        
+
         if (newMode != oldMode) {
-          
+
           // Store the nem mode to settings
           deviceSettings.portBmode = newMode;
 
@@ -367,22 +367,22 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
           /*
           if (oldMode == TYPE_WS2812) {
             doReboot = true;
-            
+
             // Set pixel strip length to zero
             pixDriver.updateStrip(1, 0, deviceSettings.portBpixConfig);
-  
+
             // Close ports from pixels - library handles if they dont exist
             for (uint8_t x = 2; x <= 4; x++)
               artRDM.closePort(portB[0], portB[x]);
 
             // Start our DMX port
             dmxB.begin(DMX_DIR_B, artRDM.getDMX(portB[0], portB[1]));
-            
-            
+
+
           } else if (oldMode == TYPE_RDM_OUT)
             dmxB.rdmDisable();
-          
-          
+
+
 
           // Start DMX output with no DMX
           if (newMode == TYPE_DMX_OUT) {
@@ -399,18 +399,18 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
           } else if (newMode == TYPE_WS2812) {
             doReboot = true;
 
-            
+
             //dmxB.end();
             artRDM.setPortType(portB[0], portB[1], TYPE_DMX_OUT);
             updatePorts = true;
-            
+
             // Initialize the pixel strip
             pixDriver.setStrip(1, DMX_TX_B, deviceSettings.portBnumPix, deviceSettings.portBpixConfig);
-            
+
           }
           */
         }
-        
+
         // Update the Artnet class
         artRDM.setNet(portB[0], deviceSettings.portBnet);
         artRDM.setSubNet(portB[0], deviceSettings.portBsub);
@@ -423,34 +423,34 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
           uint16_t newLen = (json.containsKey("portBnumPix")) ? (uint16_t)json["portBnumPix"] : deviceSettings.portBnumPix;
           if (newLen > 680)
             newLen = 680;
-          
+
           uint16_t oldLen = deviceSettings.portBnumPix;
           bool lenChanged = false;
-  
+
           // If pixel size has changed
           if (newLen <= 680 && oldLen != newLen) {
             // Update our pixel strip
             deviceSettings.portBnumPix = newLen;
             pixDriver.updateStrip(1, deviceSettings.portBnumPix, deviceSettings.portBpixConfig);
-  
+
             lenChanged = true;
 
             // If the old mode was pixel map then update the Artnet ports
             if (deviceSettings.portBpixMode == FX_MODE_PIXEL_MAP)
               updatePorts = true;
           }
-            
+
           // If the old mode was 12 channel FX, update oldLen to represent the number of channels we used
           if (deviceSettings.portBpixMode == FX_MODE_12)
             oldLen = 12;
-  
+
           // If our mode changes then update the Artnet ports
           if (deviceSettings.portBpixMode != (uint8_t)json["portBpixMode"])
             updatePorts = true;
-  
+
           // Store the new pixel mode
           deviceSettings.portBpixMode = (uint8_t)json["portBpixMode"];
-  
+
           // If our new mode is FX12 then we need 12 channels & store the start address
           if (deviceSettings.portBpixMode == FX_MODE_12) {
             if ((uint16_t)json["portBpixFXstart"] <= 501 && (uint16_t)json["portBpixFXstart"] > 0)
@@ -468,7 +468,7 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
                 artRDM.closePort(portB[0], portB[y]);
             }
           }
-  
+
           // Set universe and merge settings (port 1 is done above for all port types)
           for (uint8_t x = 1, y = 2; x < 4; x++, y++) {
             if (newLen > (x * 170)) {
@@ -477,9 +477,9 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
             }
           }
         }
-  
+
         artRDM.artPollReply();
-  
+
         eepromSave();
         return true;
       }
@@ -488,13 +488,13 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
 
     case 6:     // Scenes
       // Not yet implemented
-      
+
       return true;
       break;
 
     case 7:     // Firmware
       // Doesn't come here
-      
+
       break;
 
     default:
@@ -523,7 +523,7 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
   sprintf(MAC_char, "%02X", MAC_array[0]);
   for (int i = 1; i < 6; ++i)
     sprintf(MAC_char, "%s:%02X", MAC_char, MAC_array[i]);
-  
+
   jsonReply["macAddress"] = String(MAC_char);
 
   switch (page) {
@@ -537,10 +537,10 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
       jsonReply.remove("portAsACNuni");
       jsonReply.remove("portBsACNuni");
       jsonReply.remove("dmxInBroadcast");
-      
+
       jsonReply["nodeName"] = deviceSettings.nodeName;
       jsonReply["wifiStatus"] = wifiStatus;
-      
+
       if (isHotspot) {
         jsonReply["ipAddressT"] = deviceSettings.hotspotIp.toString();
         jsonReply["subAddressT"] = deviceSettings.hotspotSubnet.toString();
@@ -557,15 +557,15 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
           case TYPE_DMX_OUT:
             jsonReply["portAStatus"] = "DMX output";
             break;
-  
+
           case TYPE_RDM_OUT:
             jsonReply["portAStatus"] = "DMX/RDM output";
             break;
-  
+
           case TYPE_DMX_IN:
             jsonReply["portAStatus"] = "DMX input";
             break;
-  
+
           case TYPE_WS2812:
             jsonReply["portAStatus"] = "WS2812 mode";
             break;
@@ -574,21 +574,21 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
           case TYPE_DMX_OUT:
             jsonReply["portBStatus"] = "DMX output";
             break;
-  
+
           case TYPE_RDM_OUT:
             jsonReply["portBStatus"] = "DMX/RDM output";
             break;
-  
+
           case TYPE_DMX_IN:
             jsonReply["portBStatus"] = "DMX input";
             break;
-  
+
           case TYPE_WS2812:
             jsonReply["portBStatus"] = "WS2812 mode";
             break;
         }
       }
-      
+
       jsonReply["sceneStatus"] = "Not outputting<br />0 Scenes Recorded<br />0 of 250KB used";
       jsonReply["firmwareStatus"] = FIRMWARE_VERSION;
 
@@ -605,14 +605,14 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
       jsonReply.remove("portAsACNuni");
       jsonReply.remove("portBsACNuni");
       jsonReply.remove("dmxInBroadcast");
-      
+
       jsonReply["wifiSSID"] = deviceSettings.wifiSSID;
       jsonReply["wifiPass"] = deviceSettings.wifiPass;
       jsonReply["hotspotSSID"] = deviceSettings.hotspotSSID;
       jsonReply["hotspotPass"] = deviceSettings.hotspotPass;
       jsonReply["hotspotDelay"] = deviceSettings.hotspotDelay;
       jsonReply["standAloneEnable"] = deviceSettings.standAloneEnable;
-      
+
       jsonReply["success"] = 1;
       break;
 
@@ -622,7 +622,7 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
       jsonReply.remove("portAsACNuni");
       jsonReply.remove("portBsACNuni");
       jsonReply.remove("dmxInBroadcast");
-      
+
       jsonReply["dhcpEnable"] = deviceSettings.dhcpEnable;
 
       for (uint8_t x = 0; x < 4; x++) {
@@ -645,7 +645,7 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
       jsonReply.remove("bcAddress");
       jsonReply.remove("portBuni");
       jsonReply.remove("portBsACNuni");
-      
+
       jsonReply["portAmode"] = deviceSettings.portAmode;
 
       // Only Artnet supported for receiving right now
@@ -653,12 +653,12 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
         jsonReply["portAprot"] = PROT_ARTNET;
       else
         jsonReply["portAprot"] = deviceSettings.portAprot;
- 
+
       jsonReply["portAmerge"] = deviceSettings.portAmerge;
       jsonReply["portAnet"] = deviceSettings.portAnet;
       jsonReply["portAsub"] = deviceSettings.portAsub;
       jsonReply["portAnumPix"] = deviceSettings.portAnumPix;
-      
+
       jsonReply["portApixMode"] = deviceSettings.portApixMode;
       jsonReply["portApixFXstart"] = deviceSettings.portApixFXstart;
 
@@ -678,14 +678,14 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
       jsonReply.remove("bcAddress");
       jsonReply.remove("portAuni");
       jsonReply.remove("portAsACNuni");
-      
+
       jsonReply["portBmode"] = deviceSettings.portBmode;
       jsonReply["portBprot"] = deviceSettings.portBprot;
       jsonReply["portBmerge"] = deviceSettings.portBmerge;
       jsonReply["portBnet"] = deviceSettings.portBnet;
       jsonReply["portBsub"] = deviceSettings.portBsub;
       jsonReply["portBnumPix"] = deviceSettings.portBnumPix;
-      
+
       jsonReply["portBpixMode"] = deviceSettings.portBpixMode;
       jsonReply["portBpixFXstart"] = deviceSettings.portBpixFXstart;
 
@@ -694,7 +694,7 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
         portBsACNuni.add(deviceSettings.portBsACNuni[x]);
         dmxInBroadcast.add(deviceSettings.dmxInBroadcast[x]);
       }
-      
+
       jsonReply["success"] = 1;
       break;
 
@@ -708,7 +708,7 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
       jsonReply.remove("portAsACNuni");
       jsonReply.remove("portBsACNuni");
       jsonReply.remove("dmxInBroadcast");
-      
+
 
       jsonReply["success"] = 1;
       break;
@@ -723,7 +723,7 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
       jsonReply.remove("portAsACNuni");
       jsonReply.remove("portBsACNuni");
       jsonReply.remove("dmxInBroadcast");
-      
+
       jsonReply["firmwareStatus"] = FIRMWARE_VERSION;
       jsonReply["success"] = 1;
       break;
@@ -738,9 +738,8 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
       jsonReply.remove("portAsACNuni");
       jsonReply.remove("portBsACNuni");
       jsonReply.remove("dmxInBroadcast");
-      
+
       jsonReply["success"] = 0;
       jsonReply["message"] = "Invalid or incomplete data received.";
   }
 }
-

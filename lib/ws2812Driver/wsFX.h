@@ -24,10 +24,10 @@ enum  pattern { STATIC, RAINBOW_CYCLE, THEATER_CHASE, TWINKLE };
 class pixPatterns {
   public:
     pattern  ActivePattern;       // which pattern is running
-    
+
     unsigned long Interval;       // milliseconds between updates
     unsigned long lastUpdate;     // last update of position
-    
+
     uint32_t Colour1, Colour2;    // What colours are in use
     uint32_t Colour1Raw, Colour2Raw;    // Colours pre-intensity
     uint16_t TotalSteps;          // total number of steps in the pattern
@@ -36,10 +36,10 @@ class pixPatterns {
     uint8_t Size1, Size, Fade, Pos; // size, fading & position for static looks
     uint8_t Intensity;
     bool NewData;
-    
+
     uint8_t Port;                 // port number.
     ws2812Driver* pixDriver;      // the pixel driver
-    
+
     pixPatterns(uint8_t port, ws2812Driver* p);
     bool Update(void);
     void Increment(void);

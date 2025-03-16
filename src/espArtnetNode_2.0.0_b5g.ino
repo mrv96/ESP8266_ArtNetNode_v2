@@ -25,7 +25,7 @@ In order to recieve one, please complete one of the following tasks.  You can "w
     eg. Fixing the flickering WS2812 (https://github.com/mtongnz/ESP8266_ArtNetNode_v2/issues/36)
         Adding other pixel strips (https://github.com/mtongnz/ESP8266_ArtNetNode_v2/issues/42)
         Creating new web UI theme (https://github.com/mtongnz/ESP8266_ArtNetNode_v2/issues/22)
-        
+
 These prizes will be based on the first person to submit a solution that I judge to be adequate.  My decision is final.
 This competition will open to the general public a couple of weeks after the private code release to supporters.
 */
@@ -74,7 +74,7 @@ extern "C" {
 
   #define WS2812_ALLOW_INT_SINGLE false
   #define WS2812_ALLOW_INT_DOUBLE false
-  
+
 #else
   #define DMX_DIR_A 5   // D1
   #define DMX_DIR_B 16  // D0
@@ -87,7 +87,7 @@ extern "C" {
   #define STATUS_LED_A 0  // Physical wiring order for status LEDs
   #define STATUS_LED_B 1
   #define STATUS_LED_S 2
-  
+
   #define WS2812_ALLOW_INT_SINGLE false
   #define WS2812_ALLOW_INT_DOUBLE false
 #endif
@@ -176,7 +176,7 @@ void setup(void) {
 
   wifi_set_sleep_type(NONE_SLEEP_T);
   bool resetDefaults = false;
-  
+
   #ifdef SETTINGS_RESET
     pinMode(SETTINGS_RESET, INPUT);
 
@@ -188,7 +188,7 @@ void setup(void) {
         resetDefaults = true;
     }
   #endif
-  
+
   // Start EEPROM
   EEPROM.begin(512);
 
@@ -198,7 +198,7 @@ void setup(void) {
   // Check if SPIFFS formatted
   if (SPIFFS.exists("/formatted.txt")) {
     SPIFFS.format();
-    
+
     File f = SPIFFS.open("/formatted.txt", "w");
     f.print("Formatted");
     f.close();
@@ -223,21 +223,21 @@ void setup(void) {
   // Start web server
   webStart();
 
-  
+
   // Don't start our Artnet or DMX in firmware update mode or after multiple WDT resets
   if (!deviceSettings.doFirmwareUpdate && deviceSettings.wdtCounter <= 3) {
 
     // We only allow 1 DMX input - and RDM can't run alongside DMX in
     if (deviceSettings.portAmode == TYPE_DMX_IN && deviceSettings.portBmode == TYPE_RDM_OUT)
       deviceSettings.portBmode = TYPE_DMX_OUT;
-    
+
     // Setup Artnet Ports & Callbacks
     artStart();
 
     // Don't open any ports for a bit to let the ESP spill it's garbage to serial
     while (millis() < 3500)
       yield();
-    
+
     // Port Setup
     portSetup();
 
@@ -254,13 +254,13 @@ void loop(void){
     deviceSettings.wdtCounter = 0;
     eepromSave();
   }
-  
+
   webServer.handleClient();
-  
+
   // Get the node details and handle Artnet
   doNodeReport();
   artRDM.handler();
-  
+
   yield();
 
   // DMX handlers
@@ -286,16 +286,16 @@ void loop(void){
   // Do pixel string output
   if (!pixDone)
     pixDone = pixDriver.show();
-  
+
   // Handle received DMX
-  if (newDmxIn) { 
+  if (newDmxIn) {
     uint8_t g, p, n;
-    
+
     newDmxIn = false;
 
     g = portA[0];
     p = portA[1];
-    
+
     IPAddress bc = deviceSettings.dmxInBroadcast;
     artRDM.sendDMX(g, p, bc, dataIn, 512);
 
@@ -309,7 +309,7 @@ void loop(void){
     char c[ARTNET_NODE_REPORT_LENGTH] = "Device rebooting...";
     artRDM.setNodeReport(c, ARTNET_RC_POWER_OK);
     artRDM.artPollReply();
-    
+
     // Ensure all web data is sent before we reboot
     uint32_t n = millis() + 1000;
     while (millis() < n)
@@ -317,7 +317,7 @@ void loop(void){
 
     ESP.restart();
   }
-  
+
   #ifdef STATUS_LED_PIN
     // Output status to LEDs once per second
     if (statusTimer < millis()) {
@@ -339,18 +339,18 @@ void loop(void){
 void dmxHandle(uint8_t group, uint8_t port, uint16_t numChans, bool syncEnabled) {
   if (portA[0] == group) {
     if (deviceSettings.portAmode == TYPE_WS2812) {
-      
+
       #ifndef ESP_01
         setStatusLed(STATUS_LED_A, GREEN);
       #endif
-      
+
       if (deviceSettings.portApixMode == FX_MODE_PIXEL_MAP) {
         if (numChans > 510)
           numChans = 510;
-        
+
         // Copy DMX data to the pixels buffer
         pixDriver.setBuffer(0, port * 510, artRDM.getDMX(group, port), numChans);
-        
+
         // Output to pixel strip
         if (!syncEnabled)
           pixDone = false;
@@ -361,44 +361,44 @@ void dmxHandle(uint8_t group, uint8_t port, uint16_t numChans, bool syncEnabled)
       } else if (port == portA[1]) {
         byte* a = artRDM.getDMX(group, port);
         uint16_t s = deviceSettings.portApixFXstart - 1;
-        
+
         pixFXA.Intensity = a[s + 0];
         pixFXA.setFX(a[s + 1]);
         pixFXA.setSpeed(a[s + 2]);
         pixFXA.Pos = a[s + 3];
         pixFXA.Size = a[s + 4];
-        
+
         pixFXA.setColour1((a[s + 5] << 16) | (a[s + 6] << 8) | a[s + 7]);
         pixFXA.setColour2((a[s + 8] << 16) | (a[s + 9] << 8) | a[s + 10]);
         pixFXA.Size1 = a[s + 11];
         //pixFXA.Fade = a[s + 12];
 
         pixFXA.NewData = 1;
-          
+
       }
 
     // DMX modes
     } else if (deviceSettings.portAmode != TYPE_DMX_IN && port == portA[1]) {
       dmxA.chanUpdate(numChans);
-      
+
       #ifndef ESP_01
         setStatusLed(STATUS_LED_A, BLUE);
       #endif
     }
-      
+
 
   #ifndef ONE_PORT
   } else if (portB[0] == group) {
     if (deviceSettings.portBmode == TYPE_WS2812) {
       setStatusLed(STATUS_LED_B, GREEN);
-      
+
       if (deviceSettings.portBpixMode == FX_MODE_PIXEL_MAP) {
         if (numChans > 510)
           numChans = 510;
-        
+
         // Copy DMX data to the pixels buffer
         pixDriver.setBuffer(1, port * 510, artRDM.getDMX(group, port), numChans);
-        
+
         // Output to pixel strip
         if (!syncEnabled)
           pixDone = false;
@@ -409,7 +409,7 @@ void dmxHandle(uint8_t group, uint8_t port, uint16_t numChans, bool syncEnabled)
       } else if (port == portB[1]) {
         byte* a = artRDM.getDMX(group, port);
         uint16_t s = deviceSettings.portBpixFXstart - 1;
-        
+
         pixFXB.Intensity = a[s + 0];
         pixFXB.setFX(a[s + 1]);
         pixFXB.setSpeed(a[s + 2]);
@@ -452,7 +452,7 @@ void syncHandle() {
 void ipHandle() {
   if (artRDM.getDHCP()) {
     deviceSettings.gateway = INADDR_NONE;
-    
+
     deviceSettings.dhcpEnable = 1;
     doReboot = true;
     /*
@@ -462,7 +462,7 @@ void ipHandle() {
     // Wait for an IP
     while (WiFi.status() != WL_CONNECTED)
       yield();
-    
+
     // Save settings to struct
     deviceSettings.ip = WiFi.localIP();
     deviceSettings.subnet = WiFi.subnetMask();
@@ -471,7 +471,7 @@ void ipHandle() {
     // Pass IP to artRDM
     artRDM.setIP(deviceSettings.ip, deviceSettings.subnet);
     */
-  
+
   } else {
     deviceSettings.ip = artRDM.getIP();
     deviceSettings.subnet = artRDM.getSubnetMask();
@@ -479,9 +479,9 @@ void ipHandle() {
     deviceSettings.gateway[3] = 1;
     deviceSettings.broadcast = {~deviceSettings.subnet[0] | (deviceSettings.ip[0] & deviceSettings.subnet[0]), ~deviceSettings.subnet[1] | (deviceSettings.ip[1] & deviceSettings.subnet[1]), ~deviceSettings.subnet[2] | (deviceSettings.ip[2] & deviceSettings.subnet[2]), ~deviceSettings.subnet[3] | (deviceSettings.ip[3] & deviceSettings.subnet[3])};
     deviceSettings.dhcpEnable = 0;
-    
+
     doReboot = true;
-    
+
     //WiFi.config(deviceSettings.ip,deviceSettings.ip,deviceSettings.ip,deviceSettings.subnet);
   }
 
@@ -492,7 +492,7 @@ void ipHandle() {
 void addressHandle() {
   memcpy(&deviceSettings.nodeName, artRDM.getShortName(), ARTNET_SHORT_NAME_LENGTH);
   memcpy(&deviceSettings.longName, artRDM.getLongName(), ARTNET_LONG_NAME_LENGTH);
-  
+
   deviceSettings.portAnet = artRDM.getNet(portA[0]);
   deviceSettings.portAsub = artRDM.getSubNet(portA[0]);
   deviceSettings.portAuni[0] = artRDM.getUni(portA[0], portA[1]);
@@ -509,13 +509,13 @@ void addressHandle() {
     deviceSettings.portBsub = artRDM.getSubNet(portB[0]);
     deviceSettings.portBuni[0] = artRDM.getUni(portB[0], portB[1]);
     deviceSettings.portBmerge = artRDM.getMerge(portB[0], portB[1]);
-    
+
     if (artRDM.getE131(portB[0], portB[1]))
       deviceSettings.portBprot = PROT_ARTNET_SACN;
     else
       deviceSettings.portBprot = PROT_ARTNET;
   #endif
-  
+
   // Store everything to EEPROM
   eepromSave();
 }
@@ -573,13 +573,13 @@ void dmxIn(uint16_t num) {
   byte* tmp = dataIn;
   dataIn = dmxA.getChans();
   dmxA.setBuffer(tmp);
-  
+
   newDmxIn = true;
 }
 
 void doStatusLedOutput() {
   uint8_t a[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-  
+
   if (!statusLedsOff) {
     if (statusLedsDim) {
       for (uint8_t x = 0; x < 9; x++)
@@ -606,4 +606,3 @@ void doStatusLedOutput() {
 void setStatusLed(uint8_t num, uint32_t col) {
   memcpy(&statusLedData[num*3], &col, 3);
 }
-

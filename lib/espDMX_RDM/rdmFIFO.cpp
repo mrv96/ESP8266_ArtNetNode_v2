@@ -13,10 +13,10 @@ void rdmFIFO::init() {
 bool rdmFIFO::push(rdm_data* a) {
   rdm_data* b;
   b = resize(RDMfifoSize + 1);
-  
+
   if (b == NULL)
     return false;
-    
+
   memcpy(b, a, sizeof(rdm_data));
 
   // Do endian flip if its backwards
@@ -24,7 +24,7 @@ bool rdmFIFO::push(rdm_data* a) {
     b->endianFlip();
   }
 
-  
+
   return true;
 }
 
@@ -41,11 +41,11 @@ bool rdmFIFO::pop(rdm_data* a) {
 
   // Data stored in buffer big endian - esp8266 is little endian
   content[0]->endianFlip();
-  
+
   memcpy(a, content[0], sizeof(rdm_data));
-  
+
   resize(RDMfifoSize - 1);
-  
+
   return true;
 }
 
@@ -76,14 +76,14 @@ rdm_data* rdmFIFO::resize(uint8_t s) {
   if (s < RDMfifoSize) {
     //free(content[0]);
     rdm_data* a = content[0];
-    
+
     for (uint8_t x = 1; x < RDMfifoSize; x++)
       content[x-1] = content[x];
 
     content[RDMfifoSize-1] = a;
   }
 
-  
+
   if (s > RDMfifoAllocated) {  // RDMfifoSize) {
     if (!(content[s-1] = (rdm_data*)malloc(sizeof(rdm_data))))
       return NULL;
@@ -91,7 +91,7 @@ rdm_data* rdmFIFO::resize(uint8_t s) {
   }
 
   RDMfifoSize = s;
-  
+
   return (content[s-1]);
 }
 
