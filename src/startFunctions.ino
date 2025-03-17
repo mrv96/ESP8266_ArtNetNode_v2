@@ -281,9 +281,9 @@ void webStart() {
   webServer.on("/style.css", [](){
     artRDM.pause();
 
-    File f = SPIFFS.open("/style.css", "r");
+    File f = LittleFS.open("/style.css", "r");
 
-    // If no style.css in SPIFFS, send default
+    // If no style.css in LittleFS, send default
     if (!f)
       webServer.send_P(200, typeCSS, css);
     else
@@ -306,8 +306,8 @@ void webStart() {
   });
 
   webServer.on("/style_delete", [](){
-    if (SPIFFS.exists("/style.css"))
-      SPIFFS.remove("/style.css");
+    if (LittleFS.exists("/style.css"))
+      LittleFS.remove("/style.css");
 
     webServer.send(200, "text/plain", "style.css deleted.  The default style is now in use.");
     webServer.sendHeader("Connection", "close");
@@ -321,7 +321,7 @@ void webStart() {
     if(upload.status == UPLOAD_FILE_START){
       String filename = upload.filename;
       if(!filename.startsWith("/")) filename = "/"+filename;
-      fsUploadFile = SPIFFS.open(filename, "w");
+      fsUploadFile = LittleFS.open(filename, "w");
       filename = String();
 
     } else if(upload.status == UPLOAD_FILE_WRITE){
@@ -333,7 +333,7 @@ void webStart() {
         fsUploadFile.close();
 
         if (upload.filename != "/style.css")
-          SPIFFS.rename(upload.filename, "/style.css");
+          LittleFS.rename(upload.filename, "/style.css");
       }
     }
   });

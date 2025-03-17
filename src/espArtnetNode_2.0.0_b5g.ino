@@ -35,7 +35,7 @@ This competition will open to the general public a couple of weeks after the pri
 #include <ESP8266WebServer.h>
 #include <ArduinoJson.h>
 #include <EEPROM.h>
-#include <FS.h>
+#include <LittleFS.h>
 #include "store.h"
 #include "espDMX_RDM.h"
 #include "espArtNetRDM.h"
@@ -54,7 +54,7 @@ extern "C" {
 //#define ESP_01              // Un comment for ESP_01 board settings
 //#define NO_RESET            // Un comment to disable the reset button
 
-// Wemos boards use 4M (3M SPIFFS) compiler option
+// Wemos boards use 4M (3M LittleFS) compiler option
 
 
 #define ARTNET_OEM 0x0123    // Artnet OEM Code
@@ -192,14 +192,14 @@ void setup(void) {
   // Start EEPROM
   EEPROM.begin(512);
 
-  // Start SPIFFS file system
-  SPIFFS.begin();
+  // Start LittleFS file system
+  LittleFS.begin();
 
-  // Check if SPIFFS formatted
-  if (SPIFFS.exists("/formatted.txt")) {
-    SPIFFS.format();
+  // Check if LittleFS formatted
+  if (LittleFS.exists("/formatted.txt")) {
+    LittleFS.format();
 
-    File f = SPIFFS.open("/formatted.txt", "w");
+    File f = LittleFS.open("/formatted.txt", "w");
     f.print("Formatted");
     f.close();
   }
