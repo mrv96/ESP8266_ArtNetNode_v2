@@ -39,7 +39,7 @@ void webFirmwareUpdate() {
 void webFirmwareUpload() {
   String reply = "";
   HTTPUpload& upload = webServer.upload();
-    
+
   if(upload.status == UPLOAD_FILE_START){
     uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
     if(!Update.begin(maxSketchSpace)){//start with max available size
@@ -49,7 +49,7 @@ void webFirmwareUpload() {
     if(Update.write(upload.buf, upload.currentSize) != upload.currentSize){
       reply = "{\"success\":0,\"message\":\"Failed to save\"}";
     }
-    
+
   } else if(upload.status == UPLOAD_FILE_END){
     if(Update.end(true)){ //true to set the size to the current progress
       reply = "{\"success\":1,\"message\":\"Success: Device Restarting\"}";
@@ -58,7 +58,7 @@ void webFirmwareUpload() {
     }
   }
   yield();
-  
+
   // Send to the client
   if (reply.length() > 0) {
     webServer.sendHeader("Connection", "close");
