@@ -956,6 +956,8 @@ void esp8266ArtNetRDM::_artAddress(unsigned char *_artBuffer) {
 }
 
 void esp8266ArtNetRDM::_artSync(unsigned char *_artBuffer) {
+  (void)_artBuffer;
+
   // Update sync timer
   _art->lastSync = millis();
 
@@ -965,6 +967,7 @@ void esp8266ArtNetRDM::_artSync(unsigned char *_artBuffer) {
 }
 
 void esp8266ArtNetRDM::_artFirmwareMaster(unsigned char *_artBuffer) {
+  (void)_artBuffer;
   //Serial.println("artFirmwareMaster");
 }
 
@@ -1097,6 +1100,8 @@ void esp8266ArtNetRDM::_artTODControl(unsigned char *_artBuffer) {
 }
 
 void esp8266ArtNetRDM::_artRDM(unsigned char *_artBuffer, uint16_t packetSize) {
+  (void)packetSize;
+
   if (_art->rdmCallBack == 0)
     return;
 
@@ -1195,6 +1200,7 @@ void esp8266ArtNetRDM::rdmResponse(rdm_data* c, uint8_t g, uint8_t p) {
 }
 
 void esp8266ArtNetRDM::_artRDMSub(unsigned char *_artBuffer) {
+  (void)_artBuffer;
   //Serial.println("artRDMSub");
 }
 

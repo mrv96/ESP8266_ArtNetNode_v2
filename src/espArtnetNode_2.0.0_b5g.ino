@@ -569,6 +569,8 @@ void todFlush(uint8_t group, uint8_t port) {
 }
 
 void dmxIn(uint16_t num) {
+  (void)num;
+
   // Double buffer switch
   byte* tmp = dataIn;
   dataIn = dmxA.getChans();

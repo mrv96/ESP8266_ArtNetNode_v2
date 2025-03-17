@@ -104,7 +104,7 @@ void IRAM_ATTR dmx_interrupt_handler(void) {
   }
 }
 
-static void uart_ignore_char(char c) { return; }
+static void uart_ignore_char(char c) { (void)c; return; }
 
 uint16_t dmx_get_tx_fifo_room(dmx_t* dmx) {
     if(dmx == 0 || dmx->state == DMX_NOT_INIT)
