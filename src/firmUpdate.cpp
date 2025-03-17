@@ -13,7 +13,10 @@ You should have received a copy of the GNU General Public License along with thi
 If not, see http://www.gnu.org/licenses/
 */
 
-
+#include <stdint.h>
+#include <ESP8266WebServer.h>
+#include <firmUpdate.h>
+#include <main.h>
 
 /* webFirmwareUpdate()
  *  display update status after firmware upload and restart

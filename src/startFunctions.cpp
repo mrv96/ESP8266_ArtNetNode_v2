@@ -13,6 +13,20 @@ You should have received a copy of the GNU General Public License along with thi
 If not, see http://www.gnu.org/licenses/
 */
 
+#include <stdint.h>
+#include <LittleFS.h>
+#include <espDMX_RDM.h>
+#include <startFunctions.h>
+#include <config.h>
+#include <ajax.h>
+#include <firmUpdate.h>
+#include <main.h>
+#include <store.h>
+
+extern "C" {
+  #include "user_interface.h"
+  extern struct rst_info resetInfo;
+}
 
 void doNodeReport() {
   if (nextNodeReport > millis())

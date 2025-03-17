@@ -13,6 +13,12 @@ You should have received a copy of the GNU General Public License along with thi
 If not, see http://www.gnu.org/licenses/
 */
 
+#include <espDMX_RDM.h>
+#include <ajax.h>
+#include <config.h>
+#include <store.h>
+#include <main.h>
+
 void ajaxHandle() {
   JsonObject& json = jsonBuffer.parseObject(webServer.arg("plain"));
   JsonObject& jsonReply = jsonBuffer.createObject();
