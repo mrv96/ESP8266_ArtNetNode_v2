@@ -37,7 +37,7 @@ void ws2812Driver::setStrip(uint8_t port, uint8_t pin, uint16_t size, uint16_t c
   clearBuffer(port);
 
   // Clear the strip
-  byte* b = buffer[port];
+  //byte* b = buffer[port];
   //doPixel(b, _pin[port], PIX_MAX_BUFFER_SIZE);
 }
 
@@ -52,7 +52,7 @@ void ws2812Driver::updateStrip(uint8_t port, uint16_t size, uint16_t config) {
     while (_nextPix > millis())
       yield();
 
-    byte* b = buffer[port];
+    //byte* b = buffer[port];
     //doPixel(b, _pin[port], _pixels[port]);
 
     // Allow at least 50 us with LOW to make LEDs latch data
@@ -131,7 +131,7 @@ bool ws2812Driver::show() {
   return 1;
 }
 
-void ICACHE_RAM_ATTR ws2812Driver::doPixel(byte* data, uint8_t pin, uint16_t numBytes) {
+void IRAM_ATTR ws2812Driver::doPixel(byte* data, uint8_t pin, uint16_t numBytes) {
   uint8_t a, b, c, d, f;
   uint32_t cc1, cc2;
   pin = (1 << pin);
@@ -217,11 +217,11 @@ void ICACHE_RAM_ATTR ws2812Driver::doPixel(byte* data, uint8_t pin, uint16_t num
     "doExitSingle:"
       "RSIL   %[r_int], 0;"   // enable interrupts again
 
-    : [r_allow_int] "+r" (allowInterruptSingle), [r_int] "+r" (f), [r_cc1] "+r" (cc1), [r_cc2] "+r" (cc2), [r_set] "+r" (a), [r_bit] "+r" (b), [r_byte_count] "+r" (c), [r_data] "+r" (d), [r_pin] "+r" (pin), [r_data_array] "+r" (&data[0]), [r_num_bytes] "+r" (numBytes)
+    : [r_allow_int] "+r" (allowInterruptSingle), [r_int] "=r" (f), [r_cc1] "=r" (cc1), [r_cc2] "=r" (cc2), [r_set] "=r" (a), [r_bit] "=r" (b), [r_byte_count] "=r" (c), [r_data] "=r" (d), [r_pin] "+r" (pin), [r_data_array] "+r" (data), [r_num_bytes] "+r" (numBytes)
   );
 }
 
-void ICACHE_RAM_ATTR ws2812Driver::doPixelDouble(byte* data1, uint8_t pin1, byte* data2, uint8_t pin2, uint16_t numBytes) {
+void IRAM_ATTR ws2812Driver::doPixelDouble(byte* data1, uint8_t pin1, byte* data2, uint8_t pin2, uint16_t numBytes) {
   uint8_t a, b, c, d, e, f;
   uint32_t cc1, cc2;
   pin1 = (1 << pin1);
@@ -374,11 +374,11 @@ void ICACHE_RAM_ATTR ws2812Driver::doPixelDouble(byte* data1, uint8_t pin1, byte
     "doExitDouble:"
       "RSIL   %[r_int], 15;"                        // disable interrupts
 
-    : [r_allow_int] "+r" (allowInterruptDouble), [r_int] "+r" (f), [r_cc1] "+r" (cc1), [r_cc2] "+r" (cc2), [r_set] "+r" (a), [r_bit] "+r" (b), [r_byte_count] "+r" (c), [r_data1] "+r" (d), [r_pin1] "+r" (pin1), [r_data_array1] "+r" (&data1[0]), [r_data2] "+r" (e), [r_pin2] "+r" (pin2), [r_data_array2] "+r" (&data2[0]), [r_num_bytes] "+r" (numBytes)
+    : [r_allow_int] "+r" (allowInterruptDouble), [r_int] "=r" (f), [r_cc1] "=r" (cc1), [r_cc2] "=r" (cc2), [r_set] "=r" (a), [r_bit] "=r" (b), [r_byte_count] "=r" (c), [r_data1] "=r" (d), [r_pin1] "+r" (pin1), [r_data_array1] "+r" (data1), [r_data2] "=r" (e), [r_pin2] "+r" (pin2), [r_data_array2] "+r" (data2), [r_num_bytes] "+r" (numBytes)
   );
 }
 
-void ICACHE_RAM_ATTR ws2812Driver::doAPA106(byte* data, uint8_t pin, uint16_t numBytes) {
+void IRAM_ATTR ws2812Driver::doAPA106(byte* data, uint8_t pin, uint16_t numBytes) {
   uint8_t a, b, c, d, f;
   uint32_t cc1, cc2, cc3;
   pin = (1 << pin);
@@ -454,6 +454,6 @@ void ICACHE_RAM_ATTR ws2812Driver::doAPA106(byte* data, uint8_t pin, uint16_t nu
     "doExit106:"
       "RSIL   %[r_int], 0;"   // enable interrupts again
 
-    : [r_int] "+r" (f), [r_cc1] "+r" (cc1), [r_cc2] "+r" (cc2), [r_cc3] "+r" (cc3), [r_set] "+r" (a), [r_bit] "+r" (b), [r_byte_count] "+r" (c), [r_data] "+r" (d), [r_pin] "+r" (pin), [r_data_array] "+r" (&data[0]), [r_num_bytes] "+r" (numBytes)
+    : [r_int] "=r" (f), [r_cc1] "=r" (cc1), [r_cc2] "=r" (cc2), [r_cc3] "=r" (cc3), [r_set] "=r" (a), [r_bit] "=r" (b), [r_byte_count] "=r" (c), [r_data] "=r" (d), [r_pin] "+r" (pin), [r_data_array] "+r" (data), [r_num_bytes] "+r" (numBytes)
   );
 }

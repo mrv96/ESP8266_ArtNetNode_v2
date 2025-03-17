@@ -88,8 +88,8 @@ struct dmx_ {
     uint16_t txChan;
     uint16_t txSize;
 
-    long full_uni_time;
-    long last_dmx_time;
+    unsigned long full_uni_time;
+    unsigned long last_dmx_time;
     long led_timer;
     bool newDMX = false;
     bool started = false;

@@ -264,15 +264,12 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
             newLen = 680;
 
           uint16_t oldLen = deviceSettings.portAnumPix;
-          bool lenChanged = false;
 
           // If pixel size has changed
           if (newLen <= 680 && oldLen != newLen) {
             // Update our pixel strip
             deviceSettings.portAnumPix = newLen;
             pixDriver.updateStrip(1, deviceSettings.portAnumPix, deviceSettings.portApixConfig);
-
-            lenChanged = true;
 
             // If the old mode was pixel map then update the Artnet ports
             if (deviceSettings.portApixMode == FX_MODE_PIXEL_MAP)
@@ -425,15 +422,12 @@ bool ajaxSave(uint8_t page, JsonObject& json) {
             newLen = 680;
 
           uint16_t oldLen = deviceSettings.portBnumPix;
-          bool lenChanged = false;
 
           // If pixel size has changed
           if (newLen <= 680 && oldLen != newLen) {
             // Update our pixel strip
             deviceSettings.portBnumPix = newLen;
             pixDriver.updateStrip(1, deviceSettings.portBnumPix, deviceSettings.portBpixConfig);
-
-            lenChanged = true;
 
             // If the old mode was pixel map then update the Artnet ports
             if (deviceSettings.portBpixMode == FX_MODE_PIXEL_MAP)
@@ -519,10 +513,12 @@ void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
   JsonArray& dmxInBroadcast = jsonReply.createNestedArray("dmxInBroadcast");
 
   // Get MAC Address
-  char MAC_char[30] = "";
-  sprintf(MAC_char, "%02X", MAC_array[0]);
-  for (int i = 1; i < 6; ++i)
-    sprintf(MAC_char, "%s:%02X", MAC_char, MAC_array[i]);
+  char MAC_char[30];
+  sprintf(
+    MAC_char,
+    "%02" PRIX8 ":%02" PRIX8 ":%02" PRIX8 ":%02" PRIX8 ":%02" PRIX8 ":%02" PRIX8,
+    MAC_array[0], MAC_array[1], MAC_array[2], MAC_array[3], MAC_array[4], MAC_array[5]
+  );
 
   jsonReply["macAddress"] = String(MAC_char);
 

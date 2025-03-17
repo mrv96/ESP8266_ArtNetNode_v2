@@ -143,7 +143,7 @@ const char PROGMEM css[] = ".author,.title,ul.nav a{text-align:center}.author i,
 const char PROGMEM typeHTML[] = "text/html";
 const char PROGMEM typeCSS[] = "text/css";
 
-char wifiStatus[60] = "";
+char wifiStatus[70] = "";
 bool isHotspot = false;
 uint32_t nextNodeReport = 0;
 char nodeError[ARTNET_NODE_REPORT_LENGTH] = "";
@@ -289,7 +289,7 @@ void loop(void){
 
   // Handle received DMX
   if (newDmxIn) {
-    uint8_t g, p, n;
+    uint8_t g, p;
 
     newDmxIn = false;
 
@@ -477,7 +477,7 @@ void ipHandle() {
     deviceSettings.subnet = artRDM.getSubnetMask();
     deviceSettings.gateway = deviceSettings.ip;
     deviceSettings.gateway[3] = 1;
-    deviceSettings.broadcast = {~deviceSettings.subnet[0] | (deviceSettings.ip[0] & deviceSettings.subnet[0]), ~deviceSettings.subnet[1] | (deviceSettings.ip[1] & deviceSettings.subnet[1]), ~deviceSettings.subnet[2] | (deviceSettings.ip[2] & deviceSettings.subnet[2]), ~deviceSettings.subnet[3] | (deviceSettings.ip[3] & deviceSettings.subnet[3])};
+    deviceSettings.broadcast = {static_cast<uint8_t>(deviceSettings.ip[0] | ~deviceSettings.subnet[0]), static_cast<uint8_t>(deviceSettings.ip[1] | ~deviceSettings.subnet[1]), static_cast<uint8_t>(deviceSettings.ip[2] | ~deviceSettings.subnet[2]), static_cast<uint8_t>(deviceSettings.ip[3] | ~deviceSettings.subnet[3])};
     deviceSettings.dhcpEnable = 0;
 
     doReboot = true;

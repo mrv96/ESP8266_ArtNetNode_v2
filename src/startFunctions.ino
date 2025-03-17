@@ -19,6 +19,7 @@ void doNodeReport() {
     return;
 
   char c[ARTNET_NODE_REPORT_LENGTH];
+  uint8_t c_len;
 
   if (nodeErrorTimeout > millis())
     nextNodeReport = millis() + 2000;
@@ -34,43 +35,44 @@ void doNodeReport() {
     nodeErrorShowing = false;
 
     strcpy(c, "OK: PortA:");
+    c_len = strlen(c);
 
     switch (deviceSettings.portAmode) {
       case TYPE_DMX_OUT:
-        sprintf(c, "%s DMX Out", c);
+        c_len += sprintf(c + c_len, " DMX Out");
         break;
 
       case TYPE_RDM_OUT:
-        sprintf(c, "%s RDM Out", c);
+        c_len += sprintf(c + c_len, " RDM Out");
         break;
 
       case TYPE_DMX_IN:
-        sprintf(c, "%s DMX In", c);
+        c_len += sprintf(c + c_len, " DMX In");
         break;
 
       case TYPE_WS2812:
         if (deviceSettings.portApixMode == FX_MODE_12)
-            sprintf(c, "%s 12chan", c);
-          sprintf(c, "%s WS2812 %ipixels", c, deviceSettings.portAnumPix);
+          c_len += sprintf(c + c_len, " 12chan");
+        c_len += sprintf(c + c_len, " WS2812 %ipixels", deviceSettings.portAnumPix);
         break;
     }
 
     #ifndef ONE_PORT
-      sprintf(c, "%s. PortB:", c);
+      c_len +=sprintf(c + c_len, ". PortB:");
 
       switch (deviceSettings.portBmode) {
         case TYPE_DMX_OUT:
-          sprintf(c, "%s DMX Out", c);
+          sprintf(c + c_len, " DMX Out");
           break;
 
         case TYPE_RDM_OUT:
-          sprintf(c, "%s RDM Out", c);
+          sprintf(c + c_len, " RDM Out");
           break;
 
         case TYPE_WS2812:
           if (deviceSettings.portBpixMode == FX_MODE_12)
-            sprintf(c, "%s 12chan", c);
-          sprintf(c, "%s WS2812 %ipixels", c, deviceSettings.portBnumPix);
+            c_len += sprintf(c + c_len, " 12chan");
+          sprintf(c + c_len, " WS2812 %ipixels", deviceSettings.portBnumPix);
           break;
       }
     #endif
@@ -285,7 +287,7 @@ void webStart() {
     if (!f)
       webServer.send_P(200, typeCSS, css);
     else
-      size_t sent = webServer.streamFile(f, typeCSS);
+      webServer.streamFile(f, typeCSS);
 
     f.close();
     webServer.sendHeader("Connection", "close");
@@ -355,7 +357,7 @@ void wifiStart() {
 
     deviceSettings.ip = deviceSettings.hotspotIp;
     deviceSettings.subnet = deviceSettings.hotspotSubnet;
-    deviceSettings.broadcast = {~deviceSettings.subnet[0] | (deviceSettings.ip[0] & deviceSettings.subnet[0]), ~deviceSettings.subnet[1] | (deviceSettings.ip[1] & deviceSettings.subnet[1]), ~deviceSettings.subnet[2] | (deviceSettings.ip[2] & deviceSettings.subnet[2]), ~deviceSettings.subnet[3] | (deviceSettings.ip[3] & deviceSettings.subnet[3])};
+    deviceSettings.broadcast = {static_cast<uint8_t>(deviceSettings.ip[0] | ~deviceSettings.subnet[0]), static_cast<uint8_t>(deviceSettings.ip[1] | ~deviceSettings.subnet[1]), static_cast<uint8_t>(deviceSettings.ip[2] | ~deviceSettings.subnet[2]), static_cast<uint8_t>(deviceSettings.ip[3] | ~deviceSettings.subnet[3])};
 
     return;
   }
@@ -380,7 +382,7 @@ void wifiStart() {
       if (deviceSettings.gateway == INADDR_NONE)
         deviceSettings.gateway = WiFi.gatewayIP();
 
-      deviceSettings.broadcast = {~deviceSettings.subnet[0] | (deviceSettings.ip[0] & deviceSettings.subnet[0]), ~deviceSettings.subnet[1] | (deviceSettings.ip[1] & deviceSettings.subnet[1]), ~deviceSettings.subnet[2] | (deviceSettings.ip[2] & deviceSettings.subnet[2]), ~deviceSettings.subnet[3] | (deviceSettings.ip[3] & deviceSettings.subnet[3])};
+      deviceSettings.broadcast = {static_cast<uint8_t>(deviceSettings.ip[0] | ~deviceSettings.subnet[0]), static_cast<uint8_t>(deviceSettings.ip[1] | ~deviceSettings.subnet[1]), static_cast<uint8_t>(deviceSettings.ip[2] | ~deviceSettings.subnet[2]), static_cast<uint8_t>(deviceSettings.ip[3] | ~deviceSettings.subnet[3])};
     } else
       WiFi.config(deviceSettings.ip, deviceSettings.gateway, deviceSettings.subnet);
 
