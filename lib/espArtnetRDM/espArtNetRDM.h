@@ -18,8 +18,8 @@ If not, see http://www.gnu.org/licenses/
 #ifndef espArtNetRDM_h
 #define espArtNetRDM_h
 
-#include <ESP8266WiFi.h>
-#include <WiFiUdp.h>
+#include <Ethernet.h>
+#include <EthernetUdp.h>
 extern "C" {
 #include "mem.h"
 }
@@ -273,8 +273,8 @@ class esp8266ArtNetRDM {
     uint8_t _dmxSeqID = 0;
     uint8_t e131Count = 0;	// the number of e131 ports currently open
 
-    WiFiUDP eUDP;
-    WiFiUDP fUDP;
+    EthernetUDP eUDP;
+    EthernetUDP fUDP;
 };
 
 
