@@ -128,7 +128,7 @@ void setup(void) {
   LittleFS.begin();
 
   // Check if LittleFS formatted
-  if (LittleFS.exists("/formatted.txt")) {
+  if (!LittleFS.exists("/formatted.txt")) {
     LittleFS.format();
 
     File f = LittleFS.open("/formatted.txt", "w");
