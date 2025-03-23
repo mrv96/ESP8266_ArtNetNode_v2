@@ -125,15 +125,15 @@ void setup(void) {
   EEPROM.begin(512);
 
   // Start LittleFS file system
-  LittleFS.begin();
+  if (!LittleFS.begin()) {
+    LittleFS.format(); // web server contents won't be shown
 
-  // Check if LittleFS formatted
-  if (!LittleFS.exists("/formatted.txt")) {
-    LittleFS.format();
-
-    File f = LittleFS.open("/formatted.txt", "w");
-    f.print("Formatted");
-    f.close();
+    if (!LittleFS.begin()) {
+      while (1) {
+        // stay forever here as useless to go further
+        yield();
+      }
+    }
   }
 
   // Load our saved values or store defaults
