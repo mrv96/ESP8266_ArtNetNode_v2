@@ -286,8 +286,17 @@ void artStart() {
 void webStart() {
   webServer.on("/", [](){
     artRDM.pause();
-    webServer.send_P(200, typeHTML, mainPage);
+
+    File f = LittleFS.open("/index.html", "r");
+
+    if (!f)
+      webServer.send(404, "text/plain", "Page not found");
+    else
+      webServer.streamFile(f, typeHTML);
+
+    f.close();
     webServer.sendHeader("Connection", "close");
+
     yield();
     artRDM.begin();
   });
@@ -297,9 +306,8 @@ void webStart() {
 
     File f = LittleFS.open("/style.css", "r");
 
-    // If no style.css in LittleFS, send default
     if (!f)
-      webServer.send_P(200, typeCSS, css);
+      webServer.send(404, "text/plain", "Page not found");
     else
       webServer.streamFile(f, typeCSS);
 
@@ -315,7 +323,14 @@ void webStart() {
   webServer.on("/upload", HTTP_POST, webFirmwareUpdate, webFirmwareUpload);
 
   webServer.on("/style", [](){
-    webServer.send_P(200, typeHTML, cssUploadPage);
+    File f = LittleFS.open("/css_upload.html", "r");
+
+    if (!f)
+      webServer.send(404, "text/plain", "Page not found");
+    else
+      webServer.streamFile(f, typeHTML);
+
+    f.close();
     webServer.sendHeader("Connection", "close");
   });
 
@@ -350,6 +365,42 @@ void webStart() {
           LittleFS.rename(upload.filename, "/style.css");
       }
     }
+  });
+
+  webServer.on("/script.js", [](){
+    artRDM.pause();
+
+    File f = LittleFS.open("/script.js", "r");
+
+    if (!f)
+      webServer.send(404, "text/plain", "Page not found");
+    else
+      webServer.streamFile(f, typeJS);
+
+    f.close();
+    webServer.sendHeader("Connection", "close");
+
+    yield();
+    artRDM.begin();
+  });
+
+  webServer.on("/portb.js", [](){
+    artRDM.pause();
+
+    File f = LittleFS.open("/portb.js", "r");
+
+#ifdef ONE_PORT
+    if (f)
+      webServer.streamFile(f, typeJS);
+    else
+#endif
+      webServer.send(404, "text/plain", "Page not found");
+
+    f.close();
+    webServer.sendHeader("Connection", "close");
+
+    yield();
+    artRDM.begin();
   });
 
   webServer.onNotFound([]() {

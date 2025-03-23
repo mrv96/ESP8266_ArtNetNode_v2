@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<head>
+  <meta content='text/html; charset=utf-8' http-equiv=Content-Type />
+  <title>ESP8266 ArtNetNode Config</title>
+  <meta content='Matthew Tong - http://github.com/mtongnz/' name=DC.creator />
+  <meta content=en name=DC.language />
+  <meta content='width=device-width,initial-scale=1' name=viewport />
+  <link href=style.css rel=stylesheet />
+  <script src="/portb.js"></script>
+</head>
+
+<body class=basic>
+  <div id=page>
+    <div class=inner>
+      <div class=mast>
+        <div class=title>esp8266<h1>ArtNet & sACN</h1>to<h1>DMX & LED Pixels</h1>
+        </div>
+        <ul class=nav>
+          <li class=first><a href='javascript: menuClick(1)'>Device Status</a>
+          <li><a href='javascript: menuClick(2)'>WiFi</a>
+          <li><a href='javascript: menuClick(3)'>IP & Name</a>
+          <li><a href='javascript: menuClick(4)'>Port A</a>
+          <li class=portB><a href='javascript: menuClick(5)'>Port B</a>
+          <li><a href='javascript: menuClick(6)'>Scenes</a>
+          <li><a href='javascript: menuClick(7)'>Firmware</a>
+          <li class=last><a href='javascript: reboot()'>Reboot</a>
+        </ul>
+        <div class=author><i>Design by</i> Matthew Tong</div>
+      </div>
+      <div class='main section'>
+        <div class=hide name=error>
+          <h2>Error</h2>
+          <p class=center>There was an error communicating with the device. Refresh the page and try again.
+        </div>
+        <div class=show name=sections>
+          <h2>Fetching Data</h2>
+          <p class=center>Fetching data from device. If this message is still here in 15 seconds, try refreshing the
+            page
+            or clicking the menu option again.
+        </div>
+        <div class=hide name=sections>
+          <h2>Device Status</h2>
+          <p class=left>Device Name:
+          <p class=right name=nodeName>
+          <p class=left>MAC Address:
+          <p class=right name=macAddress>
+          <p class=left>Wifi Status:
+          <p class=right name=wifiStatus>
+          <p class=left>IP Address:
+          <p class=right name=ipAddressT>
+          <p class=left>Subnet Address:
+          <p class=right name=subAddressT>
+          <p class=left>Port A:
+          <p class=right name=portAStatus>
+          <p class="portB left">Port B:
+          <p class="portB right" name=portBStatus>
+          <p class=left>Scene Storage:
+          <p class=right name=sceneStatus>
+          <p class=left>Firmware:
+          <p class=right name=firmwareStatus>
+        </div>
+        <div class=hide name=sections><input name=save type=button value='Save Changes' />
+          <h2>WiFi Settings</h2>
+          <p class=left>MAC Address:
+          <p class=right name=macAddress>
+          <p class=spacer>
+          <p class=left>Wifi SSID:
+          <p class=right><input type=text name=wifiSSID />
+          <p class=left>Password:
+          <p class=right><input type=text name=wifiPass />
+          <p class=spacer>
+          <p class=left>Hotspot SSID:
+          <p class=right><input type='text' name='hotspotSSID' />
+          <p class=left>Password:
+          <p class=right><input type=text name=hotspotPass />
+          <p class=left>Start Delay:
+          <p class=right><input name=hotspotDelay type=number min=0 max=180 class=number /> (seconds)
+          <p class=spacer>
+          <p class=left>Stand Alone:
+          <p class=right><input name=standAloneEnable type=checkbox value=true />
+          <p class=right>In normal mode, the hotspot will start after <i>delay</i> seconds if the main WiFi won't
+            connect.
+            If no users connect, the device will reset and attempt the main WiFi again. This feature is purely for
+            changing settings and ArtNet data is ignored.
+          <p class=right>Stand alone mode disables the primary WiFi connection and allows ArtNet data to be received via
+            the hotspot connection.
+        </div>
+        <div class=hide name=sections><input name=save type=button value='Save Changes' />
+          <h2>IP & Node Name</h2>
+          <p class='left'>Short Name:</p>
+          <p class=right><input type=text name=nodeName />
+          <p class=left>Long Name:
+          <p class=right><input type=text name=longName />
+          <p class=spacer>
+          <p class=left>Enable DHCP:
+          <p class=right><input name=dhcpEnable type=checkbox value=true />
+          <p class=left>IP Address:
+          <p class=right><input name=ipAddress type=number min=0 max=255 class=number /> <input name=ipAddress
+              type=number min=0 max=255 class=number /> <input name=ipAddress type=number min=0 max=255 class=number />
+            <input name=ipAddress type=number min=0 max=255 class=number />
+          <p class=left>Subnet Address:
+          <p class=right><input name=subAddress type=number min=0 max=255 class=number /> <input name=subAddress
+              type=number min=0 max=255 class=number /> <input name=subAddress type=number min=0 max=255 class=number />
+            <input name=subAddress type=number min=0 max=255 class=number />
+          <p class=left>Gateway Address:
+          <p class=right><input name=gwAddress type=number min=0 max=255 class=number /> <input name=gwAddress
+              type=number min=0 max=255 class=number /> <input name=gwAddress type=number min=0 max=255 class=number />
+            <input name=gwAddress type=number min=0 max=255 class=number />
+          <p class=left>Broadcast Address:
+          <p class=right name=bcAddress>
+          <p class=center>These settings only affect the main WiFi connection. The hotspot will always have DHCP enabled
+            and an IP of <b>2.0.0.1</b>
+        </div>
+        <div class=hide name=sections><input name=save type=button value='Save Changes' />
+          <h2>Port A Settings</h2>
+          <p class=left>Port Type:
+          <p class=right><select class=select name=portAmode>
+              <option value=0>DMX Output
+              <option value=1>DMX Output with RDM
+              <option value=2>DMX Input
+              <option value=3>LED Pixels - WS2812
+            </select>
+          <p class=left>Protocol:
+          <p class=right><select class=select name=portAprot>
+              <option value=0>Artnet v4
+              <option value=1>Artnet v4 with sACN DMX
+            </select>
+          <p class=left>Merge Mode:
+          <p class=right><select class=select name=portAmerge>
+              <option value=0>Merge LTP
+              <option value=1>Merge HTP
+            </select>
+          <p class=left>Net:
+          <p class=right><input name=portAnet type=number min=0 max=127 class=number />
+          <p class=left>Subnet:
+          <p class=right><input name=portAsub type=number min=0 max=15 class=number />
+          <p class=left>Universe:
+          <p class=right><input type=number min=0 max=15 name=portAuni class=number /><span name=portApix> <input
+                type=number min=0 max=15 name=portAuni class=number /> <input type=number min=0 max=15 name=portAuni
+                class=number /> <input type=number min=0 max=15 name=portAuni class=number /></span></p>
+          <p class=left>sACN Universe:
+          <p class=right><input type=number min=0 max=63999 name=portAsACNuni class=number /> <input type=number min=1
+              max=63999 name=portAsACNuni class=number /> <input type=number min=1 max=63999 name=portAsACNuni
+              class=number /> <input type=number min=1 max=63999 name=portAsACNuni class=number /></p><span
+            name=DmxInBcAddrA>
+            <p class=left>Broadcast Address:
+            <p class=right><input type=number min=0 max=255 name=dmxInBroadcast class=number /> <input type=number min=0
+                max=255 name=dmxInBroadcast class=number /> <input type=number min=0 max=255 name=dmxInBroadcast
+                class=number /> <input type=number min=0 max=255 name=dmxInBroadcast class=number /></p>
+          </span><span name=portApix>
+            <p class=left>Number of Pixels:
+            <p class=right><input type=number min=0 max=680 name=portAnumPix class=number /> 680 max - 170 per universe
+            </p>
+            <p class=left>Mode:</p>
+            <p class=right><select class=select name=portApixMode>
+                <option value=0>Pixel Mapping</option>
+                <option value=1>12 Channel FX</option>
+              </select>
+            <p class=left>Start Channel:</p>
+            <p class=right><input type=number name=portApixFXstart class=number min=1 max=501 /> FX modes only</p>
+          </span>
+        </div>
+        <div class=hide name=sections><input name=save type=button value='Save Changes' />
+          <h2>Port B Settings</h2>
+          <p class=left>Port Type:
+          <p class=right><select class=select name=portBmode>
+              <option value=0>DMX Output
+              <option value=1>DMX Output with RDM
+              <option value=3>LED Pixels - WS2812
+            </select>
+          <p class=left>Protocol:
+          <p class=right><select class=select name=portBprot>
+              <option value=0>Artnet v4
+              <option value=1>Artnet v4 with sACN DMX
+            </select>
+          <p class=left>Merge Mode:
+          <p class=right><select class=select name=portBmerge>
+              <option value=0>Merge LTP
+              <option value=1>Merge HTP
+            </select>
+          <p class=left>Net:
+          <p class=right><input name=portBnet type=number min=0 max=127 class=number />
+          <p class=left>Subnet:
+          <p class=right><input name=portBsub type=number min=0 max=15 class=number />
+          <p class=left>Universe:
+          <p class=right><input type=number min=0 max=15 name=portBuni class=number /><span name=portBpix> <input
+                type=number min=0 max=15 name=portBuni class=number /> <input type=number min=0 max=15 name=portBuni
+                class=number /> <input type=number min=0 max=15 name=portBuni class=number /></span></p>
+          <p class=left>sACN Universe:
+          <p class=right><input type=number min=1 max=63999 name=portBsACNuni class=number /> <input type=number min=1
+              max=63999 name=portBsACNuni class=number /> <input type=number min=1 max=63999 name=portBsACNuni
+              class=number /> <input type=number min=1 max=63999 name=portBsACNuni class=number /></p><span
+            name=portBpix>
+            <p class=left>Number of Pixels:
+            <p class=right><input type=number min=0 max=680 name=portBnumPix class=number /> 680 max - 170 per universe
+            </p>
+            <p class=left>Mode:</p>
+            <p class=right><select class=select name=portBpixMode>
+                <option value=0>Pixel Mapping</option>
+                <option value=1>12 Channel FX</option>
+              </select>
+            <p class=left>Start Channel:</p>
+            <p class=right><input type=number name=portBpixFXstart class=number min=1 max=501 /> FX modes only</p>
+          </span>
+        </div>
+        <div class=hide name=sections>
+          <h2>Stored Scenes</h2>
+          <p class=center>Not yet implemented
+        </div>
+        <div class=hide name=sections>
+          <form action=/update enctype=multipart/form-data method=POST id=firmForm>
+            <h2>Update Firmware</h2>
+            <p class=left>Firmware:
+            <p class=right name=firmwareStatus>
+            <p class=right><input name=update type=file id=update><label for=update><svg height=17 viewBox='0 0 20 17'
+                  width=20 xmlns=http://www.w3.org/2000/svg>
+                  <path
+                    d='M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z' />
+                </svg> <span>Choose Firmware</span></label>
+            <p class=right id=uploadMsg></p>
+            <p class=right><input type=button class=submit value='Upload Now' id=fUp>
+        </div>
+      </div>
+      <div class=footer>
+        <p>Coding and hardware © 2016-2017 <a href=http://github.com/mtongnz />Matthew Tong</a>.
+        <p>Released under <a href=http://www.gnu.org/licenses />GNU General Public License V3</a>.
+      </div>
+    </div>
+  </div>
+  <script src="/script.js"></script>
+</body>
+
+</html>

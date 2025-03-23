@@ -32,6 +32,7 @@ extern const char PROGMEM cssUploadPage[];
 extern const char PROGMEM css[];
 extern const char PROGMEM typeHTML[];
 extern const char PROGMEM typeCSS[];
+extern const char PROGMEM typeJS[];
 
 extern char wifiStatus[70];
 extern bool isHotspot;
