@@ -1,8 +1,6 @@
 #ifndef rdmDataTypes_h
 #define rdmDataTypes_h
 
-#define byte uint8_t
-
 enum rdm_tod_state {
   RDM_TOD_NOT_READY,
   RDM_TOD_READY,
