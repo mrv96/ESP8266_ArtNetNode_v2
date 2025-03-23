@@ -48,7 +48,7 @@ extern "C" {
 }
 
 uint8_t portA[5], portB[5];
-uint8_t MAC_array[6] = {0xD2, 0x94, 0x18, 0xC1, 0x53, 0x54};
+uint8_t MAC_array[6];
 uint8_t dmxInSeqID = 0;
 uint8_t statusLedData[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint32_t statusTimer = 0;

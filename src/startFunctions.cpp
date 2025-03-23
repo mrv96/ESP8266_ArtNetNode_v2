@@ -14,6 +14,7 @@ If not, see http://www.gnu.org/licenses/
 */
 
 #include <stdint.h>
+#include <ESP8266WiFi.h>
 #include <LittleFS.h>
 #include <espDMX_RDM.h>
 #include <startFunctions.h>
@@ -416,6 +417,9 @@ void wifiStart() {
   // If it's the default WiFi SSID, make it unique
   if (strcmp(deviceSettings.hotspotSSID, "espArtNetNode") == 0 || deviceSettings.hotspotSSID[0] == '\0')
     sprintf(deviceSettings.hotspotSSID, "espArtNetNode_%05u", (ESP.getChipId() & 0xFF));
+
+  WiFi.macAddress(MAC_array);
+  MAC_array[0] |= 0x02;
 
   if (deviceSettings.standAloneEnable) {
     startHotspot();
