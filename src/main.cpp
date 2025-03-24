@@ -81,9 +81,6 @@ bool doReboot = false;
 byte* dataIn;
 
 void setup(void) {
-  //pinMode(4, OUTPUT);
-  //digitalWrite(4, LOW);
-
   // Make direction input to avoid boot garbage being sent out
   pinMode(DMX_DIR_A, OUTPUT);
   digitalWrite(DMX_DIR_A, LOW);
@@ -92,7 +89,10 @@ void setup(void) {
     digitalWrite(DMX_DIR_B, LOW);
   #endif
 
-  #ifndef ESP_01
+  pinMode(DMX_EN, OUTPUT);
+  digitalWrite(DMX_EN, HIGH);
+
+  #ifdef STATUS_LED_PIN
     pinMode(STATUS_LED_PIN, OUTPUT);
     digitalWrite(STATUS_LED_PIN, LOW);
     delay(1);
@@ -100,7 +100,7 @@ void setup(void) {
     doStatusLedOutput();
   #endif
 
-  Ethernet.init();
+  Ethernet.init(ETHERNET_CS);
 
   WiFi.mode(WIFI_OFF);
   WiFi.forceSleepBegin();
@@ -510,6 +510,7 @@ void dmxIn(uint16_t num) {
   newDmxIn = true;
 }
 
+#ifdef STATUS_LED_PIN
 void doStatusLedOutput() {
   uint8_t a[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -535,6 +536,7 @@ void doStatusLedOutput() {
   for (uint8_t x = 1; x < 9; x += 3)
     statusLedData[x] = 125;
 }
+#endif
 
 void setStatusLed(uint8_t num, uint32_t col) {
   memcpy(&statusLedData[num*3], &col, 3);
