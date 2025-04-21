@@ -52,7 +52,7 @@
 #endif
 
 #ifndef NO_RESET
-  #define SETTINGS_RESET 0
+  #define SETTINGS_RESET DMX_EN
 #endif
 
 

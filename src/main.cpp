@@ -89,9 +89,6 @@ void setup(void) {
     digitalWrite(DMX_DIR_B, LOW);
   #endif
 
-  pinMode(DMX_EN, OUTPUT);
-  digitalWrite(DMX_EN, HIGH);
-
   #ifdef STATUS_LED_PIN
     pinMode(STATUS_LED_PIN, OUTPUT);
     digitalWrite(STATUS_LED_PIN, LOW);
@@ -119,6 +116,9 @@ void setup(void) {
         resetDefaults = true;
     }
   #endif
+
+  pinMode(DMX_EN, OUTPUT_OPEN_DRAIN);
+  digitalWrite(DMX_EN, HIGH);
 
   // Start EEPROM
   EEPROM.begin(512);
