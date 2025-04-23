@@ -31,10 +31,10 @@ This competition will open to the general public a couple of weeks after the pri
 */
 
 #include <EEPROM.h>
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#include <ESP8266WiFi.h> // this generates an absurd -Wmaybe-uninitialized warning actually related to EthernetWebServer
-#pragma GCC diagnostic pop
+#pragma GCC diagnostic push //TODO: usando ESPAsyncWebServer questo non dovrebbe più servire
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized" //TODO: usando ESPAsyncWebServer questo non dovrebbe più servire
+#include <ESP8266WiFi.h>
+#pragma GCC diagnostic pop //TODO: usando ESPAsyncWebServer questo non dovrebbe più servire
 #include <LittleFS.h>
 #include <Ethernet.h>
 #include <EthernetWebServer.h>
