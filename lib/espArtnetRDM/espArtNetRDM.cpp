@@ -17,8 +17,8 @@ If not, see http://www.gnu.org/licenses/
 
 #include "espArtNetRDM.h"
 
-#include <ESP8266WiFi.h>
-#include <WiFiUdp.h>
+#include <Ethernet.h>
+#include <EthernetUdp.h>
 extern "C" {
 #include "mem.h"
 }
@@ -45,7 +45,7 @@ void esp8266ArtNetRDM::end() {
   if (_art == 0)
     return;
 
-  eUDP.stopAll();
+  eUDP.stop();
 
   for (uint8_t g = 0; g < _art->numGroups; g++) {
     for (uint8_t p = 0; p < 4; p++) {
@@ -288,7 +288,7 @@ void esp8266ArtNetRDM::pause() {
     return;
 
   eUDP.flush();
-  eUDP.stopAll();
+  eUDP.stop();
 }
 
 void esp8266ArtNetRDM::handler() {

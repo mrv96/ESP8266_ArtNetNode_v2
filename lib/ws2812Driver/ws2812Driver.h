@@ -17,7 +17,7 @@ If not, see http://www.gnu.org/licenses/
 #ifndef ws2812Driver_h
 #define ws2812Driver_h
 
-#include <ESP8266WiFi.h>
+#include <Ethernet.h>
 
 #define PIX_MAX_BUFFER_SIZE 2040
 

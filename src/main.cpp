@@ -31,7 +31,13 @@ This competition will open to the general public a couple of weeks after the pri
 */
 
 #include <EEPROM.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#include <ESP8266WiFi.h> // this generates an absurd -Wmaybe-uninitialized warning actually related to EthernetWebServer
+#pragma GCC diagnostic pop
 #include <LittleFS.h>
+#include <Ethernet.h>
+#include <EthernetWebServer.h>
 #include <espDMX_RDM.h>
 #include <main.h>
 #include <startFunctions.h>
@@ -49,7 +55,7 @@ uint8_t statusLedData[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint32_t statusTimer = 0;
 
 esp8266ArtNetRDM artRDM;
-ESP8266WebServer webServer(80);
+EthernetWebServer webServer(80);
 DynamicJsonBuffer jsonBuffer;
 ws2812Driver pixDriver;
 File fsUploadFile;
@@ -94,7 +100,12 @@ void setup(void) {
     doStatusLedOutput();
   #endif
 
-  wifi_set_sleep_type(NONE_SLEEP_T);
+  Ethernet.init();
+
+  WiFi.mode(WIFI_OFF);
+  WiFi.forceSleepBegin();
+  yield();
+
   bool resetDefaults = false;
 
   #ifdef SETTINGS_RESET

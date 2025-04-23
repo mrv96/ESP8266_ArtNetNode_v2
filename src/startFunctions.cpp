@@ -14,6 +14,7 @@ If not, see http://www.gnu.org/licenses/
 */
 
 #include <stdint.h>
+#include <ESP8266WiFi.h>
 #include <LittleFS.h>
 #include <espDMX_RDM.h>
 #include <startFunctions.h>
@@ -345,7 +346,7 @@ void webStart() {
   webServer.on("/style_upload", HTTP_POST, [](){
     webServer.send(200, "text/plain", "Upload successful!");
   }, [](){
-    HTTPUpload& upload = webServer.upload();
+    ethernetHTTPUpload& upload = webServer.upload();
 
     if(upload.status == UPLOAD_FILE_START){
       String filename = upload.filename;
@@ -417,75 +418,50 @@ void wifiStart() {
   if (strcmp(deviceSettings.hotspotSSID, "espArtNetNode") == 0 || deviceSettings.hotspotSSID[0] == '\0')
     sprintf(deviceSettings.hotspotSSID, "espArtNetNode_%05u", (ESP.getChipId() & 0xFF));
 
+  WiFi.macAddress(MAC_array);
+  MAC_array[0] |= 0x02;
+
   if (deviceSettings.standAloneEnable) {
     startHotspot();
-
-    deviceSettings.ip = deviceSettings.hotspotIp;
-    deviceSettings.subnet = deviceSettings.hotspotSubnet;
-    deviceSettings.broadcast = {static_cast<uint8_t>(deviceSettings.ip[0] | ~deviceSettings.subnet[0]), static_cast<uint8_t>(deviceSettings.ip[1] | ~deviceSettings.subnet[1]), static_cast<uint8_t>(deviceSettings.ip[2] | ~deviceSettings.subnet[2]), static_cast<uint8_t>(deviceSettings.ip[3] | ~deviceSettings.subnet[3])};
-
     return;
   }
 
-  if (deviceSettings.wifiSSID[0] != '\0') {
-    WiFi.begin(deviceSettings.wifiSSID, deviceSettings.wifiPass);
-    WiFi.mode(WIFI_STA);
-    WiFi.hostname(deviceSettings.nodeName);
+  if (deviceSettings.dhcpEnable) {
+    if (Ethernet.begin(MAC_array) == 0) {
+      strcpy(nodeError, "IP error: DHCP");
+      startHotspot();
+      return;
+    }
 
-    unsigned long endTime = millis() + (deviceSettings.hotspotDelay * 1000);
+    deviceSettings.ip = Ethernet.localIP();
+    deviceSettings.subnet = Ethernet.subnetMask();
 
-    if (deviceSettings.dhcpEnable) {
-      while (WiFi.status() != WL_CONNECTED && endTime > millis())
-        yield();
+    if (deviceSettings.gateway == INADDR_NONE)
+      deviceSettings.gateway = Ethernet.gatewayIP();
+  } else {
+    Ethernet.begin(MAC_array, deviceSettings.ip, deviceSettings.gateway, deviceSettings.gateway, deviceSettings.subnet);
+  }
 
-      if (millis() >= endTime)
-        startHotspot();
+  deviceSettings.broadcast = {static_cast<uint8_t>(deviceSettings.ip[0] | ~deviceSettings.subnet[0]), static_cast<uint8_t>(deviceSettings.ip[1] | ~deviceSettings.subnet[1]), static_cast<uint8_t>(deviceSettings.ip[2] | ~deviceSettings.subnet[2]), static_cast<uint8_t>(deviceSettings.ip[3] | ~deviceSettings.subnet[3])};
 
-      deviceSettings.ip = WiFi.localIP();
-      deviceSettings.subnet = WiFi.subnetMask();
-
-      if (deviceSettings.gateway == INADDR_NONE)
-        deviceSettings.gateway = WiFi.gatewayIP();
-
-      deviceSettings.broadcast = {static_cast<uint8_t>(deviceSettings.ip[0] | ~deviceSettings.subnet[0]), static_cast<uint8_t>(deviceSettings.ip[1] | ~deviceSettings.subnet[1]), static_cast<uint8_t>(deviceSettings.ip[2] | ~deviceSettings.subnet[2]), static_cast<uint8_t>(deviceSettings.ip[3] | ~deviceSettings.subnet[3])};
-    } else
-      WiFi.config(deviceSettings.ip, deviceSettings.gateway, deviceSettings.subnet);
-
-    //sprintf(wifiStatus, "Wifi connected.  Signal: %ld<br />SSID: %s", WiFi.RSSI(), deviceSettings.wifiSSID);
-    sprintf(wifiStatus, "Wifi connected.<br />SSID: %s", deviceSettings.wifiSSID);
-    WiFi.macAddress(MAC_array);
-
-  } else
-    startHotspot();
+  //sprintf(wifiStatus, "Wifi connected.  Signal: %ld<br />SSID: %s", WiFi.RSSI(), deviceSettings.wifiSSID);
+  sprintf(wifiStatus, "Wifi connected.<br />SSID: %s", deviceSettings.wifiSSID);
 
   yield();
 }
 
 void startHotspot() {
-  yield();
+  IPAddress firstAddr = IPAddress(
+    deviceSettings.hotspotIp[0] & deviceSettings.hotspotSubnet[0],
+    deviceSettings.hotspotIp[1] & deviceSettings.hotspotSubnet[1],
+    deviceSettings.hotspotIp[2] & deviceSettings.hotspotSubnet[2],
+    (deviceSettings.hotspotIp[3] & deviceSettings.hotspotSubnet[3]) + 1
+  );
 
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP(deviceSettings.hotspotSSID, deviceSettings.hotspotPass);
-  WiFi.softAPConfig(deviceSettings.hotspotIp, deviceSettings.hotspotIp, deviceSettings.hotspotSubnet);
+  Ethernet.begin(MAC_array, deviceSettings.hotspotIp, firstAddr, firstAddr, deviceSettings.hotspotSubnet);
 
-  sprintf(wifiStatus, "No Wifi. Hotspot started.<br />\nHotspot SSID: %s", deviceSettings.hotspotSSID);
-  WiFi.macAddress(MAC_array);
-
-  isHotspot = true;
-
-  if (deviceSettings.standAloneEnable)
-    return;
-
-  webStart();
-
-  unsigned long endTime = millis() + 30000;
-
-  // Stay here if not in stand alone mode - no dmx or artnet
-  while (endTime > millis() || wifi_softap_get_station_num() > 0) {
-    webServer.handleClient();
-    yield();
-  }
-
-  ESP.restart();
-  isHotspot = false;
+  deviceSettings.ip = deviceSettings.hotspotIp;
+  deviceSettings.subnet = deviceSettings.hotspotSubnet;
+  deviceSettings.broadcast = deviceSettings.hotspotBroadcast;
+  deviceSettings.gateway = firstAddr;
 }

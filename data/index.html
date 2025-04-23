@@ -19,7 +19,6 @@
         </div>
         <ul class=nav>
           <li class=first><a href='javascript: menuClick(1)'>Device Status</a>
-          <li><a href='javascript: menuClick(2)'>WiFi</a>
           <li><a href='javascript: menuClick(3)'>IP & Name</a>
           <li><a href='javascript: menuClick(4)'>Port A</a>
           <li class=portB><a href='javascript: menuClick(5)'>Port B</a>
@@ -46,8 +45,6 @@
           <p class=right name=nodeName>
           <p class=left>MAC Address:
           <p class=right name=macAddress>
-          <p class=left>Wifi Status:
-          <p class=right name=wifiStatus>
           <p class=left>IP Address:
           <p class=right name=ipAddressT>
           <p class=left>Subnet Address:
@@ -61,31 +58,7 @@
           <p class=left>Firmware:
           <p class=right name=firmwareStatus>
         </div>
-        <div class=hide name=sections><input name=save type=button value='Save Changes' />
-          <h2>WiFi Settings</h2>
-          <p class=left>MAC Address:
-          <p class=right name=macAddress>
-          <p class=spacer>
-          <p class=left>Wifi SSID:
-          <p class=right><input type=text name=wifiSSID />
-          <p class=left>Password:
-          <p class=right><input type=text name=wifiPass />
-          <p class=spacer>
-          <p class=left>Hotspot SSID:
-          <p class=right><input type='text' name='hotspotSSID' />
-          <p class=left>Password:
-          <p class=right><input type=text name=hotspotPass />
-          <p class=left>Start Delay:
-          <p class=right><input name=hotspotDelay type=number min=0 max=180 class=number /> (seconds)
-          <p class=spacer>
-          <p class=left>Stand Alone:
-          <p class=right><input name=standAloneEnable type=checkbox value=true />
-          <p class=right>In normal mode, the hotspot will start after <i>delay</i> seconds if the main WiFi won't
-            connect.
-            If no users connect, the device will reset and attempt the main WiFi again. This feature is purely for
-            changing settings and ArtNet data is ignored.
-          <p class=right>Stand alone mode disables the primary WiFi connection and allows ArtNet data to be received via
-            the hotspot connection.
+        <div class=hide name=sections>
         </div>
         <div class=hide name=sections><input name=save type=button value='Save Changes' />
           <h2>IP & Node Name</h2>
@@ -110,8 +83,8 @@
             <input name=gwAddress type=number min=0 max=255 class=number />
           <p class=left>Broadcast Address:
           <p class=right name=bcAddress>
-          <p class=center>These settings only affect the main WiFi connection. The hotspot will always have DHCP enabled
-            and an IP of <b>2.0.0.1</b>
+          <p class=center>These settings only affect the main connection. If DHCP is enabled and fails, the node will
+            always have IP <b>2.0.0.1</b>
         </div>
         <div class=hide name=sections><input name=save type=button value='Save Changes' />
           <h2>Port A Settings</h2>

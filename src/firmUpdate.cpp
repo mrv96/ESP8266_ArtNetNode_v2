@@ -14,7 +14,6 @@ If not, see http://www.gnu.org/licenses/
 */
 
 #include <stdint.h>
-#include <ESP8266WebServer.h>
 #include <firmUpdate.h>
 #include <main.h>
 
@@ -41,7 +40,7 @@ void webFirmwareUpdate() {
  */
 void webFirmwareUpload() {
   String reply = "";
-  HTTPUpload& upload = webServer.upload();
+  ethernetHTTPUpload& upload = webServer.upload();
 
   if(upload.status == UPLOAD_FILE_START){
     uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
