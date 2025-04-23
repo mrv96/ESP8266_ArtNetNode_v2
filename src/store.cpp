@@ -6,7 +6,7 @@ struct StoreStruct deviceSettings = {
   CONFIG_VERSION,
 
   // The default values
-  IPAddress(2,0,0,1), IPAddress(255,0,0,0), IPAddress(2,0,0,1), IPAddress(2,255,255,255), IPAddress(2,0,0,1), IPAddress(255,0,0,0), IPAddress(2,255,255,255), IPAddress(2,255,255,255),
+  INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE, IPAddress(2,0,0,1), IPAddress(255,0,0,0), IPAddress(2,255,255,255), IPAddress(2,255,255,255),
   true, false,
   "espArtNetNode", "espArtNetNode by Matthew Tong", "", "", "espArtNetNode", "byMtongnz2017",
   15,
