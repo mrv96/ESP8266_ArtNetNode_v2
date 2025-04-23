@@ -81,6 +81,8 @@ bool doReboot = false;
 byte* dataIn;
 
 void setup(void) {
+  bool resetDefaults = false;
+
   // Make direction input to avoid boot garbage being sent out
   pinMode(DMX_DIR_A, OUTPUT);
   digitalWrite(DMX_DIR_A, LOW);
@@ -97,13 +99,8 @@ void setup(void) {
     doStatusLedOutput();
   #endif
 
-  Ethernet.init(ETHERNET_CS);
-
-  WiFi.mode(WIFI_OFF);
-  WiFi.forceSleepBegin();
-  yield();
-
-  bool resetDefaults = false;
+  pinMode(DMX_EN, OUTPUT_OPEN_DRAIN);
+  digitalWrite(DMX_EN, HIGH);
 
   #ifdef SETTINGS_RESET
     pinMode(SETTINGS_RESET, INPUT);
@@ -117,8 +114,11 @@ void setup(void) {
     }
   #endif
 
-  pinMode(DMX_EN, OUTPUT_OPEN_DRAIN);
-  digitalWrite(DMX_EN, HIGH);
+  Ethernet.init(ETHERNET_CS);
+
+  WiFi.mode(WIFI_OFF);
+  WiFi.forceSleepBegin();
+  yield();
 
   // Start EEPROM
   EEPROM.begin(512);
