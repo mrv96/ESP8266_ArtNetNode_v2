@@ -33,8 +33,9 @@ This competition will open to the general public a couple of weeks after the pri
 #include <EEPROM.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#include <LittleFS.h> // this generates an absurd -Wmaybe-uninitialized warning actually related to EthernetWebServer
+#include <ESP8266WiFi.h> // this generates an absurd -Wmaybe-uninitialized warning actually related to EthernetWebServer
 #pragma GCC diagnostic pop
+#include <LittleFS.h>
 #include <Ethernet.h>
 #include <EthernetWebServer.h>
 #include <espDMX_RDM.h>
@@ -101,7 +102,10 @@ void setup(void) {
 
   Ethernet.init();
 
-  wifi_set_sleep_type(NONE_SLEEP_T);
+  WiFi.mode(WIFI_OFF);
+  WiFi.forceSleepBegin();
+  yield();
+
   bool resetDefaults = false;
 
   #ifdef SETTINGS_RESET
