@@ -31,13 +31,17 @@
   #define WS2812_ALLOW_INT_DOUBLE false
 
 #else
-  #define DMX_DIR_A 5   // D1
+  #define ETHERNET_CS 5
+
+  #define DMX_DIR_A 15  // D8
   #define DMX_DIR_B 16  // D0
   #define DMX_TX_A 1
   #define DMX_TX_B 2
 
-  #define STATUS_LED_PIN 12
-//  #define STATUS_LED_MODE_WS2812
+  #define DMX_EN 4
+
+  // #define STATUS_LED_PIN 12
+  // #define STATUS_LED_MODE_WS2812
   #define STATUS_LED_MODE_APA106
   #define STATUS_LED_A 0  // Physical wiring order for status LEDs
   #define STATUS_LED_B 1
@@ -48,7 +52,7 @@
 #endif
 
 #ifndef NO_RESET
-  #define SETTINGS_RESET 14
+  #define SETTINGS_RESET DMX_EN
 #endif
 
 
