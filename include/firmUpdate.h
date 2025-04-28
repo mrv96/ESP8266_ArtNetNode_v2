@@ -2,8 +2,8 @@
 #define _FIRMUPDATE_H_
 
 
-void webFirmwareUpdate();
-void webFirmwareUpload();
+void webFirmwareUpdate(AsyncWebServerRequest *request);
+void webFirmwareUpload(AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final);
 
 
 #endif

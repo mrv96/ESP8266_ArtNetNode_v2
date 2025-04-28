@@ -9,26 +9,6 @@ DATA_DIR = Path(env.subst('$PROJECT_DATA_DIR'))
 BUILD_DATA_DIR = Path(env.subst('$BUILD_DIR')) / DATA_DIR.name
 
 
-def rm_lib_src(libdir:str):
-    lib = Path(env.get('PROJECT_LIBDEPS_DIR')) / env.get('PIOENV') / libdir
-    piopm = lib / '.piopm'
-    library_json = lib / 'library.json'
-
-    if len(tuple(lib.iterdir())) <= 2:
-        return
-
-    with piopm.open() as f1, library_json.open() as f2:
-        piopm_content = f1.read()
-        library_json_content = f2.read()
-
-    shutil.rmtree(str(lib), ignore_errors=True)
-    lib.mkdir()
-
-    with piopm.open('w') as f1, library_json.open('w') as f2:
-        f1.write(piopm_content)
-        f2.write(library_json_content)
-
-
 def surround_with_ifndef(file:Path, define_name:str):
     indexes = []
 
@@ -82,10 +62,6 @@ def minify_web_sources(source, target, env):
     for p in DATA_DIR.rglob('*.js'):
         new_p = BUILD_DATA_DIR / p.relative_to(DATA_DIR)
         new_p.write_text(rjsmin.jsmin(p.read_text()))
-
-
-# Remove EthernetWebServer unneeded deps to avoid build conflicts
-rm_lib_src('Ethernet_Generic')
 
 
 # Allow MAX_SOCK_NUM GCC define surrounding C MAX_SOCK_NUM defines with #ifndef/endif

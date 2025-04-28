@@ -19,11 +19,11 @@ If not, see http://www.gnu.org/licenses/
 #include <store.h>
 #include <main.h>
 
-void ajaxHandle() {
-  JsonObject& json = jsonBuffer.parseObject(webServer.arg("plain"));
+void ajaxHandle(AsyncWebServerRequest *request, JsonVariant &jsonVariant) {
+  JsonObject& json = jsonVariant.as<JsonObject>();
   JsonObject& jsonReply = jsonBuffer.createObject();
 
-  String reply;
+  AsyncResponseStream *response = request->beginResponseStream("application/json");
 
   // Handle request to reboot into update mode
   if (json.containsKey("success") && json["success"] == 1 && json.containsKey("doUpdate")) {
@@ -32,8 +32,8 @@ void ajaxHandle() {
     jsonReply["success"] = 1;
     jsonReply["doUpdate"] = 1;
 
-    jsonReply.printTo(reply);
-    webServer.send(200, "application/json", reply);
+    jsonReply.printTo(*response);
+    request->send(response);
 
     if (json["doUpdate"] == 1) {
       // Turn pixel strips off if they're on
@@ -73,8 +73,8 @@ void ajaxHandle() {
   // Handle errors
   }
 
-  jsonReply.printTo(reply);
-  webServer.send(200, "application/json", reply);
+  jsonReply.printTo(*response);
+  request->send(response);
 }
 
 bool ajaxSave(uint8_t page, JsonObject& json) {

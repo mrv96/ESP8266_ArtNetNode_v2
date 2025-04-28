@@ -20,15 +20,16 @@ If not, see http://www.gnu.org/licenses/
 /* webFirmwareUpdate()
  *  display update status after firmware upload and restart
  */
-void webFirmwareUpdate() {
+void webFirmwareUpdate(AsyncWebServerRequest *request) {
   // Generate the webpage from the variables above
   String fail = "{\"success\":0,\"message\":\"Unknown Error\"}";
   String ok = "{\"success\":1,\"message\":\"Success: Device restarting\"}";
 
   // Send to the client
-  webServer.sendHeader("Connection", "close");
-  webServer.sendHeader("Access-Control-Allow-Origin", "*");
-  webServer.send(200, "application/json", (Update.hasError()) ? fail : ok);
+  AsyncWebServerResponse *response = request->beginResponse(200, "application/json", (Update.hasError()) ? fail : ok);
+  response->addHeader("Connection", "close");
+  response->addHeader("Access-Control-Allow-Origin", "*");
+  request->send(response);
 
   doReboot = true;
 }
@@ -38,7 +39,7 @@ void webFirmwareUpdate() {
 /* webFirmwareUpload()
  *  handle firmware upload and update
  */
-void webFirmwareUpload() {
+void webFirmwareUpload(AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final) {
   String reply = "";
   ethernetHTTPUpload& upload = webServer.upload();
 

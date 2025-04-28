@@ -285,127 +285,100 @@ void artStart() {
 }
 
 void webStart() {
-  webServer.on("/", [](){
+  // webServer.serveStatic("/", LittleFS, "/index.html"); //TODO: si può usare se rimuoviamo artRDM handling
+  // webServer.serveStatic("/", LittleFS, "/").setDefaultFile("index.html"); //TODO: utile per debug navigare filesystem
+  webServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    AsyncWebServerResponse *response;
+
+    response = request->beginResponse(LittleFS, "/index.html");
+    if (response == NULL) {
+      request->beginResponse(404, "text/plain", "Page not found"); //TODO
+    }
+    response->onDisconnect([]() {
+      artRDM.begin();
+    });
+
     artRDM.pause();
-
-    File f = LittleFS.open("/index.html", "r");
-
-    if (!f)
-      webServer.send(404, "text/plain", "Page not found");
-    else
-      webServer.streamFile(f, typeHTML);
-
-    f.close();
-    webServer.sendHeader("Connection", "close");
-
-    yield();
-    artRDM.begin();
+    request->send(response);
   });
 
-  webServer.on("/style.css", [](){
+  webServer.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){
+    AsyncWebServerResponse *response;
+
+    response = request->beginResponse(LittleFS, "/style.css");
+    if (response == NULL) {
+      request->beginResponse(404, "text/plain", "Page not found"); //TODO
+    }
+    response->onDisconnect([]() {
+      artRDM.begin();
+    });
+
     artRDM.pause();
-
-    File f = LittleFS.open("/style.css", "r");
-
-    if (!f)
-      webServer.send(404, "text/plain", "Page not found");
-    else
-      webServer.streamFile(f, typeCSS);
-
-    f.close();
-    webServer.sendHeader("Connection", "close");
-
-    yield();
-    artRDM.begin();
+    request->send(response);
   });
 
-  webServer.on("/ajax", HTTP_POST, ajaxHandle);
+  AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/ajax", ajaxHandle);
+  server.addHandler(handler);
 
   webServer.on("/upload", HTTP_POST, webFirmwareUpdate, webFirmwareUpload);
 
-  webServer.on("/style", [](){
-    File f = LittleFS.open("/css_upload.html", "r");
+  webServer.serveStatic("/style", LittleFS, "/css_upload.html"); //TODO 404
 
-    if (!f)
-      webServer.send(404, "text/plain", "Page not found");
-    else
-      webServer.streamFile(f, typeHTML);
-
-    f.close();
-    webServer.sendHeader("Connection", "close");
-  });
-
-  webServer.on("/style_delete", [](){
-    if (LittleFS.exists("/style.css"))
+  webServer.on("/style_delete", HTTP_GET, [](AsyncWebServerRequest *request){
+    if (LittleFS.exists("/style.css")) {
       LittleFS.remove("/style.css");
-
-    webServer.send(200, "text/plain", "style.css deleted.  The default style is now in use.");
-    webServer.sendHeader("Connection", "close");
+    }
+    request->send(200, "text/plain", "style.css deleted. The default style is now in use.");
   });
 
-  webServer.on("/style_upload", HTTP_POST, [](){
-    webServer.send(200, "text/plain", "Upload successful!");
-  }, [](){
-    ethernetHTTPUpload& upload = webServer.upload();
-
-    if(upload.status == UPLOAD_FILE_START){
-      String filename = upload.filename;
-      if(!filename.startsWith("/")) filename = "/"+filename;
-      fsUploadFile = LittleFS.open(filename, "w");
-      filename = String();
-
-    } else if(upload.status == UPLOAD_FILE_WRITE){
-      if(fsUploadFile)
-        fsUploadFile.write(upload.buf, upload.currentSize);
-
-    } else if(upload.status == UPLOAD_FILE_END){
-      if(fsUploadFile) {
-        fsUploadFile.close();
-
-        if (upload.filename != "/style.css")
-          LittleFS.rename(upload.filename, "/style.css");
+  webServer.on("/style_upload", HTTP_POST, [](AsyncWebServerRequest *request){
+    request->send(200, "text/plain", "Upload successful!");
+  }, [](AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final){
+    if(!index){
+      request->_tempFile = LittleFS.open("/style.css", "w");
+    } else if (request->_tempFile) {
+      request->_tempFile.write(data, len);
+      if(final){
+        request->_tempFile.close();
       }
     }
   });
 
-  webServer.on("/script.js", [](){
+  webServer.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request){
+    AsyncWebServerResponse *response;
+
+    response = request->beginResponse(LittleFS, "/script.js");
+    if (response == NULL) {
+      request->beginResponse(404, "text/plain", "Page not found"); //TODO
+    }
+    response->onDisconnect([]() {
+      artRDM.begin();
+    });
+
     artRDM.pause();
-
-    File f = LittleFS.open("/script.js", "r");
-
-    if (!f)
-      webServer.send(404, "text/plain", "Page not found");
-    else
-      webServer.streamFile(f, typeJS);
-
-    f.close();
-    webServer.sendHeader("Connection", "close");
-
-    yield();
-    artRDM.begin();
+    request->send(response);
   });
 
-  webServer.on("/portb.js", [](){
-    artRDM.pause();
-
-    File f = LittleFS.open("/portb.js", "r");
+  webServer.on("/portb.js", HTTP_GET, [](AsyncWebServerRequest *request){
+    AsyncWebServerResponse *response;
 
 #ifdef ONE_PORT
-    if (f)
-      webServer.streamFile(f, typeJS);
-    else
+    response = request->beginResponse(LittleFS, "/portb.js");
+    if (response == NULL)
 #endif
-      webServer.send(404, "text/plain", "Page not found");
+    {
+      request->beginResponse(404, "text/plain", "Page not found"); //TODO
+    }
+    response->onDisconnect([]() {
+      artRDM.begin();
+    });
 
-    f.close();
-    webServer.sendHeader("Connection", "close");
-
-    yield();
-    artRDM.begin();
+    artRDM.pause();
+    request->send(response);
   });
 
-  webServer.onNotFound([]() {
-    webServer.send(404, "text/plain", "Page not found");
+  webServer.onNotFound([](AsyncWebServerRequest *request){
+    request->send(404, "text/plain", "Page not found"); //TODO tenere testo?
   });
 
   webServer.begin();

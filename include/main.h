@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 #include <Ethernet.h>
-#include <EthernetWebServer.hpp>
+#include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
 #include <espArtNetRDM.h>
 #include <ws2812Driver.h>
@@ -17,7 +17,7 @@ extern uint8_t statusLedData[9];
 extern uint32_t statusTimer;
 
 extern esp8266ArtNetRDM artRDM;
-extern EthernetWebServer webServer;
+extern AsyncWebServer webServer;
 extern DynamicJsonBuffer jsonBuffer;
 extern ws2812Driver pixDriver;
 extern File fsUploadFile;

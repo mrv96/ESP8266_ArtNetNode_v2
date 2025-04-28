@@ -31,13 +31,13 @@ This competition will open to the general public a couple of weeks after the pri
 */
 
 #include <EEPROM.h>
-#pragma GCC diagnostic push //TODO: usando ESPAsyncWebServer questo non dovrebbe più servire
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized" //TODO: usando ESPAsyncWebServer questo non dovrebbe più servire
+// #pragma GCC diagnostic push //TODO: usando ESPAsyncWebServer questo non dovrebbe più servire
+// #pragma GCC diagnostic ignored "-Wmaybe-uninitialized" //TODO: usando ESPAsyncWebServer questo non dovrebbe più servire
 #include <ESP8266WiFi.h>
-#pragma GCC diagnostic pop //TODO: usando ESPAsyncWebServer questo non dovrebbe più servire
+// #pragma GCC diagnostic pop //TODO: usando ESPAsyncWebServer questo non dovrebbe più servire
 #include <LittleFS.h>
 #include <Ethernet.h>
-#include <EthernetWebServer.h>
+#include <ESPAsyncWebServer.h>
 #include <espDMX_RDM.h>
 #include <main.h>
 #include <startFunctions.h>
@@ -55,7 +55,7 @@ uint8_t statusLedData[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint32_t statusTimer = 0;
 
 esp8266ArtNetRDM artRDM;
-EthernetWebServer webServer(80);
+AsyncWebServer webServer(80);
 DynamicJsonBuffer jsonBuffer;
 ws2812Driver pixDriver;
 File fsUploadFile;
