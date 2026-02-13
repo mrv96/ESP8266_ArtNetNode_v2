@@ -16,6 +16,7 @@ If not, see http://www.gnu.org/licenses/
 #include <stdint.h>
 #include <ESP8266WiFi.h>
 #include <LittleFS.h>
+#include <AsyncJson.h>
 #include <espDMX_RDM.h>
 #include <startFunctions.h>
 #include <config.h>
@@ -292,7 +293,7 @@ void webStart() {
 
     response = request->beginResponse(LittleFS, "/index.html");
     if (response == NULL) {
-      request->beginResponse(404, "text/plain", "Page not found"); //TODO
+      response = request->beginResponse(404, "text/plain", "Page not found"); //TODO
     }
     response->onDisconnect([]() {
       artRDM.begin();
@@ -307,7 +308,7 @@ void webStart() {
 
     response = request->beginResponse(LittleFS, "/style.css");
     if (response == NULL) {
-      request->beginResponse(404, "text/plain", "Page not found"); //TODO
+      response = request->beginResponse(404, "text/plain", "Page not found"); //TODO
     }
     response->onDisconnect([]() {
       artRDM.begin();
@@ -318,7 +319,7 @@ void webStart() {
   });
 
   AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/ajax", ajaxHandle);
-  server.addHandler(handler);
+  webServer.addHandler(handler);
 
   webServer.on("/upload", HTTP_POST, webFirmwareUpdate, webFirmwareUpload);
 
@@ -334,9 +335,11 @@ void webStart() {
   webServer.on("/style_upload", HTTP_POST, [](AsyncWebServerRequest *request){
     request->send(200, "text/plain", "Upload successful!");
   }, [](AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final){
+    (void)filename;
     if(!index){
       request->_tempFile = LittleFS.open("/style.css", "w");
-    } else if (request->_tempFile) {
+    }
+    if (request->_tempFile) {
       request->_tempFile.write(data, len);
       if(final){
         request->_tempFile.close();
@@ -349,7 +352,7 @@ void webStart() {
 
     response = request->beginResponse(LittleFS, "/script.js");
     if (response == NULL) {
-      request->beginResponse(404, "text/plain", "Page not found"); //TODO
+      response = request->beginResponse(404, "text/plain", "Page not found"); //TODO
     }
     response->onDisconnect([]() {
       artRDM.begin();
@@ -367,7 +370,7 @@ void webStart() {
     if (response == NULL)
 #endif
     {
-      request->beginResponse(404, "text/plain", "Page not found"); //TODO
+      response = request->beginResponse(404, "text/plain", "Page not found"); //TODO
     }
     response->onDisconnect([]() {
       artRDM.begin();

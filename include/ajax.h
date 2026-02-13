@@ -3,6 +3,7 @@
 
 
 #include <stdint.h>
+#include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
 
 void ajaxHandle(AsyncWebServerRequest *request, JsonVariant &jsonVariant);
