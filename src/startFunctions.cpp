@@ -291,11 +291,11 @@ void webStart() {
   webServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     AsyncWebServerResponse *response;
 
-    response = request->beginResponse(LittleFS, "/index.html");
+    response = request->beginResponse(LittleFS, "/index.html", "");
     if (response == NULL) {
       response = request->beginResponse(404, "text/plain", "Page not found"); //TODO
     }
-    response->onDisconnect([]() {
+    request->onDisconnect([]() {
       artRDM.begin();
     });
 
@@ -306,11 +306,11 @@ void webStart() {
   webServer.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){
     AsyncWebServerResponse *response;
 
-    response = request->beginResponse(LittleFS, "/style.css");
+    response = request->beginResponse(LittleFS, "/style.css", "");
     if (response == NULL) {
       response = request->beginResponse(404, "text/plain", "Page not found"); //TODO
     }
-    response->onDisconnect([]() {
+    request->onDisconnect([]() {
       artRDM.begin();
     });
 
@@ -350,11 +350,15 @@ void webStart() {
   webServer.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request){
     AsyncWebServerResponse *response;
 
-    response = request->beginResponse(LittleFS, "/script.js");
+    response = request->beginResponse(LittleFS, "/script.js", "");
     if (response == NULL) {
       response = request->beginResponse(404, "text/plain", "Page not found"); //TODO
     }
-    response->onDisconnect([]() {
+    // AsyncClient *currentClient { request->client() };
+    // currentClient->onDisconnect([]() {
+    //   artRDM.begin();
+    // });
+    request->onDisconnect([]() {
       artRDM.begin();
     });
 
@@ -372,7 +376,7 @@ void webStart() {
     {
       response = request->beginResponse(404, "text/plain", "Page not found"); //TODO
     }
-    response->onDisconnect([]() {
+    request->onDisconnect([]() {
       artRDM.begin();
     });
 

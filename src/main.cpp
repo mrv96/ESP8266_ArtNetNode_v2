@@ -186,8 +186,6 @@ void loop(void){
     eepromSave();
   }
 
-  webServer.handleClient();
-
   // Get the node details and handle Artnet
   doNodeReport();
   artRDM.handler();
@@ -244,7 +242,7 @@ void loop(void){
     // Ensure all web data is sent before we reboot
     uint32_t n = millis() + 1000;
     while (millis() < n)
-      webServer.handleClient();
+      ;
 
     ESP.restart();
   }

@@ -41,19 +41,22 @@ void webFirmwareUpdate(AsyncWebServerRequest *request) {
  */
 void webFirmwareUpload(AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final) {
   String reply = "";
-  ethernetHTTPUpload& upload = webServer.upload();
 
-  if(upload.status == UPLOAD_FILE_START){
+  (void)filename;
+
+  if(!index){
+    Update.runAsync(true);
     uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
     if(!Update.begin(maxSketchSpace)){//start with max available size
       reply = "{\"success\":0,\"message\":\"Insufficient space.\"}";
     }
-  } else if(upload.status == UPLOAD_FILE_WRITE){
-    if(Update.write(upload.buf, upload.currentSize) != upload.currentSize){
+  }
+  if(!Update.hasError()){
+    if(Update.write(data, len) != len){
       reply = "{\"success\":0,\"message\":\"Failed to save\"}";
     }
-
-  } else if(upload.status == UPLOAD_FILE_END){
+  }
+  if(final){
     if(Update.end(true)){ //true to set the size to the current progress
       reply = "{\"success\":1,\"message\":\"Success: Device Restarting\"}";
     } else {
@@ -64,8 +67,9 @@ void webFirmwareUpload(AsyncWebServerRequest *request, const String &filename, s
 
   // Send to the client
   if (reply.length() > 0) {
-    webServer.sendHeader("Connection", "close");
-    webServer.sendHeader("Access-Control-Allow-Origin", "*");
-    webServer.send(200, "application/json", reply);
+    AsyncWebServerResponse *response = request->beginResponse(200, "application/json", reply);
+    response->addHeader("Connection", "close");
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(response);
   }
 }
